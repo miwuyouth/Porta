@@ -45,19 +45,29 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
         return true
     }
 
+    public func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return false
+    }
+
     public func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
             showMainWindow()
         }
-        return true
+        return false
     }
 
     public func showMainWindow() {
         if let window = mainWindow {
+            if window.isMiniaturized {
+                window.deminiaturize(nil)
+            }
             window.makeKeyAndOrderFront(nil)
             NSApplication.shared.activate(ignoringOtherApps: true)
         } else if let window = NSApplication.shared.windows.first {
             configureWindow(window)
+            if window.isMiniaturized {
+                window.deminiaturize(nil)
+            }
             window.makeKeyAndOrderFront(nil)
             NSApplication.shared.activate(ignoringOtherApps: true)
         }

@@ -1,0 +1,77 @@
+name: Release App
+
+on:
+  push:
+    tags:
+      - 'v*' # 仅在推送类似 v1.0.0 的 tag 时触发自动打包发布
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '手动指定发布版本号 (例如 1.0.0，为空则自动从 tag 或 commit 派生)'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    name: Build & Release macOS App
+    runs-on: macos-14
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve Version & Git Commit
+        id: meta
+        run: |
+          # 1. 计算版本号
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            VERSION="${TAG_NAME#v}"
+          fi
+
+          # 2. 计算 Git Commit ID
+          SHORT_SHA=$(git rev-parse --short HEAD)
+
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "=========================================="
+          echo "Target Version  : $VERSION"
+          echo "Target Commit ID: $SHORT_SHA"
+          echo "=========================================="
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build & Package App (.dmg & .zip)
+        run: |
+          chmod +x scripts/package.sh
+          ./scripts/package.sh "${{ steps.meta.outputs.VERSION }}"
+
+      - name: Create GitHub Release & Upload Assets
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: |
+            dist/*.dmg
+            dist/*.zip
+          name: "Porta v${{ steps.meta.outputs.VERSION }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Artifacts (for manual workflow dispatch)
+        uses: actions/upload-artifact@v4
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        with:
+          name: Porta-${{ steps.meta.outputs.VERSION }}-${{ steps.meta.outputs.SHORT_SHA }}
+          path: |
+            dist/*.dmg
+            dist/*.zip
