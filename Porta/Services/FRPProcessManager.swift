@@ -91,14 +91,18 @@ public final class FRPProcessManager: ObservableObject {
                 .map { $0.trimmingCharacters(in: .whitespaces) }
                 .filter { !$0.isEmpty }
 
+            let safeName = FRPConfigGenerator.sanitizeProxyName(proxy.name)
+            let secretKey = (proxyType == .stcp || proxyType == .xtcp) ? server.token : nil
+
             return FRPProxyConfig(
-                name: proxy.name,
+                name: safeName,
                 type: proxyType,
                 localIP: proxy.localIP.isEmpty ? "127.0.0.1" : proxy.localIP,
                 localPort: proxy.localPort,
-                remotePort: proxy.remotePort,
+                remotePort: (proxyType == .http || proxyType == .https) ? nil : proxy.remotePort,
                 customDomains: domains,
                 subdomain: proxy.subdomain?.trimmingCharacters(in: .whitespaces).isEmpty == false ? proxy.subdomain : nil,
+                secretKey: secretKey,
                 useEncryption: proxy.useEncryption,
                 useCompression: proxy.useCompression
             )
@@ -143,7 +147,7 @@ public final class FRPProcessManager: ObservableObject {
             },
             onStatusChange: { [weak self] isConnected, errorMsg in
                 DispatchQueue.main.async {
-                    guard let self = self else { return }
+                    guard let self = self, !self.isExplicitlyStopped else { return }
                     if isConnected {
                         self.isRunning = true
                         self.status = .connected
@@ -167,11 +171,13 @@ public final class FRPProcessManager: ObservableObject {
             guard let self = self else { return }
             do {
                 try await service?.start()
+                guard !Task.isCancelled, !self.isExplicitlyStopped else { return }
                 await MainActor.run {
                     self.isRunning = true
                     self.status = .connected
                 }
             } catch {
+                guard !Task.isCancelled, !self.isExplicitlyStopped else { return }
                 await MainActor.run {
                     self.isRunning = false
                     self.status = .error(error.localizedDescription)
@@ -228,6 +234,7 @@ public final class FRPProcessManager: ObservableObject {
         clientService = nil
 
         Task {
+            await svc?.detachCallbacks()
             await svc?.stop()
         }
 
@@ -276,11 +283,8 @@ public final class FRPProcessManager: ObservableObject {
         }
     }
 
-    private func tagForProxyName(_ name: String) -> String {
-        if name == "Web 服务" { return "web" }
-        if name == "SSH" { return "ssh" }
-        if name == "开发预览" { return "dev" }
-        return name.lowercased()
+    public func tagForProxyName(_ name: String) -> String {
+        FRPConfigGenerator.sanitizeProxyName(name)
     }
 
     private func parseRealFrpLog(_ output: String) {

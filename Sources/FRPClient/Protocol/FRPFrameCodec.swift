@@ -66,7 +66,7 @@ public enum FRPFrameCodec {
         }
 
         let lengthData = headerData.subdata(in: (headerData.startIndex + 1)..<(headerData.startIndex + 9))
-        let rawBigEndianLength = lengthData.withUnsafeBytes { $0.load(as: Int64.self) }
+        let rawBigEndianLength = lengthData.withUnsafeBytes { $0.loadUnaligned(as: Int64.self) }
         let length = Int64(bigEndian: rawBigEndianLength)
 
         guard length >= 0 && length <= maxPayloadLength else {

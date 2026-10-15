@@ -57,8 +57,9 @@ public final class CryptoConnection: AsyncConnection, @unchecked Sendable {
     public func write(_ data: Data) async throws {
         guard !data.isEmpty else { return }
 
-        // 1. Ensure IV is sent on first write
-        let (needsIV, enc) = writeLock.withLock { () -> (Data?, CCCryptorRef) in
+        // 1. Prepare packet (IV + ciphertext) atomically under writeLock
+        let packetToWrite: Data = try writeLock.withLock {
+            var packet = Data()
             if !ivSent {
                 var randomIV = [UInt8](repeating: 0, count: 16)
                 _ = SecRandomCopyBytes(kSecRandomDefault, 16, &randomIV)
@@ -75,33 +76,31 @@ public final class CryptoConnection: AsyncConnection, @unchecked Sendable {
                     &cryptor
                 )
                 if status != kCCSuccess || cryptor == nil {
-                    // Fallback or unrecoverable error
                     fatalError("Failed to create AES-CFB encryptor: \(status)")
                 }
                 self.encCryptor = cryptor
                 self.ivSent = true
-                return (Data(randomIV), cryptor!)
+                packet.append(contentsOf: randomIV)
             }
-            return (nil, encCryptor!)
-        }
 
-        if let ivData = needsIV {
-            try await underlying.write(ivData)
-        }
+            guard let enc = encCryptor else {
+                throw AsyncConnectionError.writeFailed("Encryptor not initialized")
+            }
 
-        // 2. Encrypt and write payload
-        var ciphertext = [UInt8](repeating: 0, count: data.count)
-        var outLen: Int = 0
-        let status = writeLock.withLock {
-            data.withUnsafeBytes { rawPtr in
+            var ciphertext = [UInt8](repeating: 0, count: data.count)
+            var outLen: Int = 0
+            let status = data.withUnsafeBytes { rawPtr in
                 CCCryptorUpdate(enc, rawPtr.baseAddress, data.count, &ciphertext, ciphertext.count, &outLen)
             }
-        }
-        guard status == kCCSuccess else {
-            throw AsyncConnectionError.writeFailed("AES-CFB encryption failed with status \(status)")
+            guard status == kCCSuccess else {
+                throw AsyncConnectionError.writeFailed("AES-CFB encryption failed with status \(status)")
+            }
+
+            packet.append(contentsOf: ciphertext)
+            return packet
         }
 
-        try await underlying.write(Data(ciphertext))
+        try await underlying.write(packetToWrite)
     }
 
     private func ensureDecrypter() async throws {

@@ -93,6 +93,26 @@ final class ConfigSourceTests: XCTestCase {
         XCTAssertEqual(watcher.activeWatcherCount, 0)
     }
 
+    func testConfigSourceMultipleUnwatchOrder() {
+        let watcher = ConfigWatcher()
+        let id1 = watcher.watch { _ in }
+        let id2 = watcher.watch { _ in }
+        let id3 = watcher.watch { _ in }
+        XCTAssertEqual(watcher.activeWatcherCount, 3)
+
+        // Unwatch middle first
+        watcher.unwatch(id: id2)
+        XCTAssertEqual(watcher.activeWatcherCount, 2)
+
+        // Unwatch first
+        watcher.unwatch(id: id1)
+        XCTAssertEqual(watcher.activeWatcherCount, 1)
+
+        // Unwatch last
+        watcher.unwatch(id: id3)
+        XCTAssertEqual(watcher.activeWatcherCount, 0)
+    }
+
     func testConfigSourceReloadData() throws {
         let mem = MemoryConfigSource(config: FRPClientConfig(serverAddr: "v1.host"))
         XCTAssertEqual(try mem.load().serverAddr, "v1.host")

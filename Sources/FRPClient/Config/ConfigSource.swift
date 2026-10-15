@@ -86,24 +86,25 @@ public final class AggregatorConfigSource: ConfigSource, @unchecked Sendable {
 
 public final class ConfigWatcher: @unchecked Sendable {
     private let lock = SafeLock()
-    private var listeners: [(FRPClientConfig) -> Void] = []
+    private var nextWatcherId: Int = 1
+    private var listeners: [Int: (FRPClientConfig) -> Void] = [:]
     private var isWatching = false
 
     public init() {}
 
     public func watch(_ listener: @escaping (FRPClientConfig) -> Void) -> Int {
         lock.withLock {
-            listeners.append(listener)
+            let id = nextWatcherId
+            nextWatcherId += 1
+            listeners[id] = listener
             isWatching = true
-            return listeners.count - 1
+            return id
         }
     }
 
     public func unwatch(id: Int) {
         lock.withLock {
-            if id >= 0 && id < listeners.count {
-                listeners.remove(at: id)
-            }
+            listeners.removeValue(forKey: id)
             if listeners.isEmpty {
                 isWatching = false
             }
@@ -115,7 +116,7 @@ public final class ConfigWatcher: @unchecked Sendable {
     }
 
     public func notifyChange(_ newConfig: FRPClientConfig) {
-        let callbacks = lock.withLock { listeners }
+        let callbacks = lock.withLock { Array(listeners.values) }
         for cb in callbacks {
             cb(newConfig)
         }

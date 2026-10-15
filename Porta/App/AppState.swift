@@ -76,8 +76,10 @@ public final class AppState: ObservableObject {
         self.selectedServerId = server.id
         saveData()
 
-        // Reconnect with new server config
-        processManager.start(server: server, proxies: currentProxies, settings: settings)
+        // Reconnect with new server config if running
+        if processManager.isRunning {
+            processManager.start(server: server, proxies: currentProxies, settings: settings)
+        }
     }
 
     public func toggleProxy(_ proxy: FRPProxy) {
@@ -127,14 +129,16 @@ public final class AppState: ObservableObject {
         servers.append(server)
         selectedServerId = server.id
         saveData()
-        processManager.start(server: server, proxies: currentProxies, settings: settings)
+        if processManager.isRunning {
+            processManager.start(server: server, proxies: currentProxies, settings: settings)
+        }
     }
 
     public func updateServer(_ server: FRPServer) {
         if let index = servers.firstIndex(where: { $0.id == server.id }) {
             servers[index] = server
             saveData()
-            if selectedServerId == server.id {
+            if processManager.isRunning && selectedServerId == server.id {
                 processManager.start(server: server, proxies: currentProxies, settings: settings)
             }
         }

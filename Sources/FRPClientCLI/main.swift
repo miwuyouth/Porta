@@ -56,8 +56,9 @@ struct FRPClientCLI {
         let service = FRPClientService(config: config)
 
         // Setup signal handling for graceful shutdown
-        let sigintSource = DispatchSource.makeSignalSource(signal: SIGINT, queue: .main)
-        let sigtermSource = DispatchSource.makeSignalSource(signal: SIGTERM, queue: .main)
+        let signalQueue = DispatchQueue(label: "com.frp.cli.signals")
+        let sigintSource = DispatchSource.makeSignalSource(signal: SIGINT, queue: signalQueue)
+        let sigtermSource = DispatchSource.makeSignalSource(signal: SIGTERM, queue: signalQueue)
 
         sigintSource.setEventHandler {
             print("\nReceived SIGINT. Shutting down...")

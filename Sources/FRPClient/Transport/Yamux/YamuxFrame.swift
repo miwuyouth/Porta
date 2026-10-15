@@ -67,9 +67,9 @@ public struct YamuxHeader: Sendable {
         let version = data[start]
         guard let type = YamuxType(rawValue: data[start + 1]) else { return nil }
 
-        let flagsRaw = data.subdata(in: (start + 2)..<(start + 4)).withUnsafeBytes { $0.load(as: UInt16.self) }
-        let streamIDRaw = data.subdata(in: (start + 4)..<(start + 8)).withUnsafeBytes { $0.load(as: UInt32.self) }
-        let lengthRaw = data.subdata(in: (start + 8)..<(start + 12)).withUnsafeBytes { $0.load(as: UInt32.self) }
+        let flagsRaw = data.subdata(in: (start + 2)..<(start + 4)).withUnsafeBytes { $0.loadUnaligned(as: UInt16.self) }
+        let streamIDRaw = data.subdata(in: (start + 4)..<(start + 8)).withUnsafeBytes { $0.loadUnaligned(as: UInt32.self) }
+        let lengthRaw = data.subdata(in: (start + 8)..<(start + 12)).withUnsafeBytes { $0.loadUnaligned(as: UInt32.self) }
 
         return YamuxHeader(
             version: version,

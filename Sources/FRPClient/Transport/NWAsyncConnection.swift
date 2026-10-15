@@ -97,10 +97,14 @@ public final class NWAsyncConnection: AsyncConnection, @unchecked Sendable {
                 context.setTimeoutItem(timeoutItem)
                 queue.asyncAfter(deadline: .now() + timeout, execute: timeoutItem)
 
-                nwConn.stateUpdateHandler = { state in
+                nwConn.stateUpdateHandler = { [weak asyncConn] state in
                     switch state {
                     case .ready:
-                        context.resume(with: .success(asyncConn))
+                        if let conn = asyncConn {
+                            context.resume(with: .success(conn))
+                        } else {
+                            context.resume(with: .failure(AsyncConnectionError.closed))
+                        }
                     case .failed(let error):
                         context.resume(with: .failure(AsyncConnectionError.connectionFailed(error.localizedDescription)))
                     case .cancelled:
@@ -203,6 +207,7 @@ public final class NWAsyncConnection: AsyncConnection, @unchecked Sendable {
         }
 
         if shouldCancel {
+            connection.stateUpdateHandler = nil
             connection.cancel()
         }
     }

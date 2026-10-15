@@ -37,8 +37,9 @@ public struct StaticFilePlugin: FRPPlugin, Sendable {
 
         let fullURL = URL(fileURLWithPath: localPath).appendingPathComponent(cleanRequest).standardized
         let baseStandardized = URL(fileURLWithPath: localPath).standardized.path
+        let basePathWithSlash = baseStandardized.hasSuffix("/") ? baseStandardized : baseStandardized + "/"
 
-        if fullURL.path.hasPrefix(baseStandardized) {
+        if fullURL.path == baseStandardized || fullURL.path.hasPrefix(basePathWithSlash) {
             return fullURL.path
         }
         return nil // Attempted path traversal

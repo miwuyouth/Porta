@@ -72,7 +72,7 @@ public final class FRPConfigGenerator {
         return lines.joined(separator: "\n")
     }
 
-    private static func sanitizeProxyName(_ name: String) -> String {
+    public static func sanitizeProxyName(_ name: String) -> String {
         // Map common names to clean ascii tags if needed, or transliterate
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed == "Web 服务" { return "web" }
