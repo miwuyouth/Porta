@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-frp}",
+            "name": "Debug frpc-swift",
+            "target": "frpc-swift",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug frpc-swift"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-frp}",
+            "name": "Release frpc-swift",
+            "target": "frpc-swift",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release frpc-swift"
+        }
+    ]
+}
