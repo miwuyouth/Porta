@@ -3,38 +3,16 @@ import SwiftUI
 public struct LogsView: View {
     @ObservedObject var appState: AppState = .shared
     @ObservedObject var logManager: LogManager = .shared
-    @State private var isBackHovered: Bool = false
 
     public init() {}
 
     public var body: some View {
         VStack(spacing: 0) {
-            // Header: 日志 gear
-            WindowHeaderView(title: "日志", showBackButton: false, showGearButton: true)
+            // Header: <  日志  gear
+            WindowHeaderView(title: "日志", showBackButton: true, showGearButton: true)
 
             // Filter and Action Bar
             HStack(spacing: 10) {
-                // Back Button (aligned with main interface 28pt margin)
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.18)) {
-                        appState.currentScreen = .main
-                    }
-                }) {
-                    Image(systemName: "chevron.backward")
-                        .font(.system(size: 12.5, weight: .semibold))
-                        .foregroundColor(isBackHovered ? .primary : Color.primary.opacity(0.68))
-                        .frame(width: 28, height: 28)
-                        .background(Color(nsColor: .controlBackgroundColor))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
-                        )
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .onHover { isBackHovered = $0 }
-                .help("返回")
-
                 // Proxy Filter Picker
                 Menu {
                     Button("全部代理") {

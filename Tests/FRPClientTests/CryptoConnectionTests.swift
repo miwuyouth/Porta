@@ -62,4 +62,29 @@ final class CryptoConnectionTests: XCTestCase {
         clientCrypto.close()
         serverCrypto.close()
     }
+
+    func testKnownVectorMatchesGoStandard() async throws {
+        let (pipeA, pipeB) = MockPipeConnection.createPair()
+        let cryptoConn = CryptoConnection(wrapping: pipeA, token: "")
+
+        let testIV = Data(0..<16)
+        let plaintext = Data("Hello, FRP CFB test!".utf8)
+        let expectedCiphertextHex = "b1550d66d39aa283054e4d7f42022c1367a54691"
+
+        // Write fake incoming IV + ciphertext into pipeB
+        var incoming = testIV
+        var hexBytes = [UInt8]()
+        var hexStr = expectedCiphertextHex[...]
+        while !hexStr.isEmpty {
+            let byteStr = hexStr.prefix(2)
+            hexStr = hexStr.dropFirst(2)
+            hexBytes.append(UInt8(byteStr, radix: 16)!)
+        }
+        incoming.append(contentsOf: hexBytes)
+        try await pipeB.write(incoming)
+
+        // Read through cryptoConn
+        let decrypted = try await cryptoConn.read(exactCount: plaintext.count)
+        XCTAssertEqual(decrypted, plaintext)
+    }
 }

@@ -38,8 +38,11 @@ final class IntegrationTests: XCTestCase {
                         try await serverConn.writeMessage(resp)
                     }
 
+                    // Wrap server connection in CryptoConnection to match FRP wire protocol
+                    let encryptedServerConn = CryptoConnection(wrapping: serverConn, token: "secret_123")
+
                     // 2. Read NewProxy
-                    let msg2 = try await serverConn.readMessage()
+                    let msg2 = try await encryptedServerConn.readMessage()
                     if let proxy = msg2 as? FRPNewProxyMessage {
                         XCTAssertEqual(proxy.proxyName, "mock_tcp")
                         XCTAssertEqual(proxy.remotePort, 19000)
@@ -47,7 +50,7 @@ final class IntegrationTests: XCTestCase {
 
                         // Send NewProxyResp
                         let resp = FRPNewProxyRespMessage(proxyName: "mock_tcp", remoteAddr: "127.0.0.1:19000", error: nil)
-                        try await serverConn.writeMessage(resp)
+                        try await encryptedServerConn.writeMessage(resp)
                     }
                 } catch {
                     // Connection closed or done
@@ -116,11 +119,12 @@ final class IntegrationTests: XCTestCase {
             XCTAssertEqual(loginMsg.user, "alice")
             try await serverPipe.writeMessage(FRPLoginRespMessage(version: "0.61.0", runID: "run-abc", error: nil))
 
+            let encServer = CryptoConnection(wrapping: serverPipe, token: "token123")
             // Read Proxy registrations (order independent)
             for _ in 0..<2 {
-                let proxyMsg = try await serverPipe.readMessage() as! FRPNewProxyMessage
+                let proxyMsg = try await encServer.readMessage() as! FRPNewProxyMessage
                 XCTAssertTrue(proxyMsg.proxyName == "tcp_tunnel" || proxyMsg.proxyName == "http_site")
-                try await serverPipe.writeMessage(FRPNewProxyRespMessage(
+                try await encServer.writeMessage(FRPNewProxyRespMessage(
                     proxyName: proxyMsg.proxyName,
                     remoteAddr: "127.0.0.1:18080",
                     error: nil
@@ -192,9 +196,10 @@ final class IntegrationTests: XCTestCase {
             _ = try await serverPipe.readMessage() as! FRPLoginMessage
             try await serverPipe.writeMessage(FRPLoginRespMessage(version: "0.61.0", runID: "run-abc", error: nil))
 
-            _ = try await serverPipe.readMessage() as! FRPNewProxyMessage
+            let encServer = CryptoConnection(wrapping: serverPipe, token: "token123")
+            _ = try await encServer.readMessage() as! FRPNewProxyMessage
             // Return proxy registration error
-            try await serverPipe.writeMessage(FRPNewProxyRespMessage(proxyName: "conflict_proxy", remoteAddr: nil, error: "port [18080] already bound"))
+            try await encServer.writeMessage(FRPNewProxyRespMessage(proxyName: "conflict_proxy", remoteAddr: nil, error: "port [18080] already bound"))
         }
 
         let client = FRPClientService(config: clientConfig, connector: connector)
@@ -266,12 +271,14 @@ final class IntegrationTests: XCTestCase {
             _ = try await controlServer.readMessage() as! FRPLoginMessage
             try await controlServer.writeMessage(FRPLoginRespMessage(version: "0.61.0", runID: "run-relay-test", error: nil))
 
+            let encControlServer = CryptoConnection(wrapping: controlServer, token: "test_token")
+
             // 2. NewProxy
-            _ = try await controlServer.readMessage() as! FRPNewProxyMessage
-            try await controlServer.writeMessage(FRPNewProxyRespMessage(proxyName: "echo_service", remoteAddr: "127.0.0.1:19000", error: nil))
+            _ = try await encControlServer.readMessage() as! FRPNewProxyMessage
+            try await encControlServer.writeMessage(FRPNewProxyRespMessage(proxyName: "echo_service", remoteAddr: "127.0.0.1:19000", error: nil))
 
             // 3. Server instructs client to open work connection
-            try await controlServer.writeMessage(FRPReqWorkConnMessage())
+            try await encControlServer.writeMessage(FRPReqWorkConnMessage())
 
             // 4. Server accepts work connection from client
             let newWorkMsg = try await workServer.readMessage() as! FRPNewWorkConnMessage
