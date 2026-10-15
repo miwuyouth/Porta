@@ -64,8 +64,16 @@ public actor FRPClientService {
         if let handlers = proxyHandlers {
             self.proxyHandlers = handlers
         } else {
+            let logCallback = self.onLog
             for proxyCfg in config.proxies {
-                self.proxyHandlers[proxyCfg.name] = DefaultProxyHandler(config: proxyCfg, authToken: config.auth.token)
+                self.proxyHandlers[proxyCfg.name] = DefaultProxyHandler(
+                    config: proxyCfg,
+                    authToken: config.auth.token,
+                    onLog: { level, msg in
+                        print("[FRP Client] [\(proxyCfg.name)] \(msg)")
+                        logCallback?(level, proxyCfg.name, msg)
+                    }
+                )
             }
         }
     }
@@ -87,20 +95,27 @@ public actor FRPClientService {
             self.connector = conn
             try await conn.open()
 
-            let controlConnection = try await conn.connect()
-            self.ctlConn = controlConnection
+            let rawControlConnection = try await conn.connect()
+            self.ctlConn = rawControlConnection
 
-            // 1. Perform Login
-            try await performLogin(on: controlConnection)
+            // 1. Perform Login (raw plaintext)
+            try await performLogin(on: rawControlConnection)
+
+            // Wrap control connection in CryptoConnection (FRP standard protocol)
+            let encryptedControlConnection = CryptoConnection(
+                wrapping: rawControlConnection,
+                token: config.auth.token
+            )
+            self.ctlConn = encryptedControlConnection
 
             // 2. Start receiving messages from control connection
-            startMessageLoop(on: controlConnection)
+            startMessageLoop(on: encryptedControlConnection)
 
             // 3. Register Proxies
-            try await registerProxies(on: controlConnection)
+            try await registerProxies(on: encryptedControlConnection)
 
             // 4. Start Heartbeat if needed
-            startHeartbeat(on: controlConnection)
+            startHeartbeat(on: encryptedControlConnection)
 
             log("服务器连接成功")
             onStatusChange?(true, nil)
@@ -263,6 +278,10 @@ public actor FRPClientService {
             }
         case let newProxyResp as FRPNewProxyRespMessage:
             handleNewProxyResp(newProxyResp)
+        case is FRPPingMessage:
+            if let ctlConn = ctlConn {
+                try? await ctlConn.writeMessage(FRPPongMessage())
+            }
         case let pong as FRPPongMessage:
             if let error = pong.error, !error.isEmpty {
                 log("收到 Pong 错误: \(error)", level: .warn)

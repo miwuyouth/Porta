@@ -15,41 +15,45 @@ public struct MainView: View {
             // Server Header Row (Green dot, 东京服务器 ⌵, 已连接)
             ServerHeaderRow()
 
-            // Proxy List & Add Button
-            ScrollView {
-                VStack(spacing: 0) {
-                    ForEach(appState.currentProxies) { proxy in
-                        ProxyRowView(proxy: proxy)
+            // Proxy List or Empty State
+            if appState.currentProxies.isEmpty {
+                emptyStateView
+            } else {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ForEach(appState.currentProxies) { proxy in
+                            ProxyRowView(proxy: proxy)
 
-                        Divider()
-                            .padding(.horizontal, 28)
-                    }
+                            Divider()
+                                .padding(.horizontal, 28)
+                        }
 
-                    // Add Proxy Button
-                    HStack(spacing: 8) {
-                        Button(action: {
-                            appState.activeSheet = .addProxy
-                        }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "plus")
-                                    .font(.system(size: 13, weight: .semibold))
-                                Text("添加代理")
-                                    .font(.system(size: 14, weight: .medium))
+                        // Add Proxy Button
+                        HStack(spacing: 8) {
+                            Button(action: {
+                                appState.activeSheet = .addProxy
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 13, weight: .semibold))
+                                    Text("添加代理")
+                                        .font(.system(size: 14, weight: .medium))
+                                }
+                                .foregroundColor(Color(red: 0.0, green: 0.48, blue: 1.0))
+                                .opacity(isAddHovered ? 0.75 : 1.0)
+                                .contentShape(Rectangle())
                             }
-                            .foregroundColor(Color(red: 0.0, green: 0.48, blue: 1.0))
-                            .opacity(isAddHovered ? 0.75 : 1.0)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .onHover { hovering in
-                            isAddHovered = hovering
-                        }
+                            .buttonStyle(.plain)
+                            .onHover { hovering in
+                                isAddHovered = hovering
+                            }
 
-                        Spacer()
+                            Spacer()
+                        }
+                        .padding(.horizontal, 28)
+                        .padding(.top, 14)
+                        .padding(.bottom, 16)
                     }
-                    .padding(.horizontal, 28)
-                    .padding(.top, 14)
-                    .padding(.bottom, 16)
                 }
             }
 
@@ -84,5 +88,23 @@ public struct MainView: View {
             .background(Color(nsColor: .windowBackgroundColor))
         }
         .background(Color(nsColor: .windowBackgroundColor))
+    }
+
+    @ViewBuilder
+    private var emptyStateView: some View {
+        ContentUnavailableView {
+            Label("暂无代理", systemImage: "point.3.connected.trianglepath.dotted")
+        } description: {
+            Text("当前服务器尚未添加任何代理\n点击下方按钮快速配置本地端口映射")
+        } actions: {
+            Button(action: {
+                appState.activeSheet = .addProxy
+            }) {
+                Label("添加代理", systemImage: "plus")
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.regular)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

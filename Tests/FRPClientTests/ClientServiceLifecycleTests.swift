@@ -268,8 +268,9 @@ final class ClientServiceLifecycleTests: XCTestCase {
         _ = Task {
             _ = try await serverConn.readMessage()
             try await serverConn.writeMessage(FRPLoginRespMessage(version: "0.61.0", runID: "run-reg-fail", error: nil))
-            _ = try await serverConn.readMessage()
-            try await serverConn.writeMessage(FRPNewProxyRespMessage(proxyName: "failing_reg", remoteAddr: "", error: "port conflict"))
+            let encServer = CryptoConnection(wrapping: serverConn, token: "")
+            _ = try await encServer.readMessage()
+            try await encServer.writeMessage(FRPNewProxyRespMessage(proxyName: "failing_reg", remoteAddr: "", error: "port conflict"))
         }
 
         do {

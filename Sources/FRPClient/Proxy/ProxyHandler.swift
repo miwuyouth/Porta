@@ -10,23 +10,26 @@ public final class DefaultProxyHandler: ProxyHandler, @unchecked Sendable {
     public let config: FRPProxyConfig
     private let authToken: String?
     private let localDialer: (@Sendable (String, Int) async throws -> any AsyncConnection)?
+    private let onLog: (@Sendable (FRPClientLogLevel, String) -> Void)?
 
     public init(
         config: FRPProxyConfig,
         authToken: String? = nil,
-        localDialer: (@Sendable (String, Int) async throws -> any AsyncConnection)? = nil
+        localDialer: (@Sendable (String, Int) async throws -> any AsyncConnection)? = nil,
+        onLog: (@Sendable (FRPClientLogLevel, String) -> Void)? = nil
     ) {
         self.config = config
         self.authToken = authToken
         self.localDialer = localDialer
+        self.onLog = onLog
     }
 
     public func makeNewProxyMessage() -> FRPNewProxyMessage {
         var msg = FRPNewProxyMessage(
             proxyName: config.name,
             proxyType: config.type.rawValue,
-            useEncryption: config.useEncryption,
-            useCompression: config.useCompression
+            useEncryption: config.useEncryption ? true : nil,
+            useCompression: config.useCompression ? true : nil
         )
 
         switch config.type {
@@ -72,7 +75,9 @@ public final class DefaultProxyHandler: ProxyHandler, @unchecked Sendable {
             // Start bidirectional pump
             await StreamBridge.bridge(activeWorkConn, localConn)
         } catch {
-            print("[Proxy \(config.name)] Failed to connect to local service at \(config.localIP):\(config.localPort): \(error)")
+            let errorMsg = "连接本地服务 \(config.localIP):\(config.localPort) 失败: \(error)"
+            onLog?(.warn, errorMsg)
+            print("[Proxy \(config.name)] \(errorMsg)")
             workConn.close()
         }
     }
