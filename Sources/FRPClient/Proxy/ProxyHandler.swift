@@ -8,13 +8,16 @@ public protocol ProxyHandler: Sendable {
 
 public final class DefaultProxyHandler: ProxyHandler, @unchecked Sendable {
     public let config: FRPProxyConfig
+    private let authToken: String?
     private let localDialer: (@Sendable (String, Int) async throws -> any AsyncConnection)?
 
     public init(
         config: FRPProxyConfig,
+        authToken: String? = nil,
         localDialer: (@Sendable (String, Int) async throws -> any AsyncConnection)? = nil
     ) {
         self.config = config
+        self.authToken = authToken
         self.localDialer = localDialer
     }
 
@@ -47,6 +50,14 @@ public final class DefaultProxyHandler: ProxyHandler, @unchecked Sendable {
 
     public func handleWorkConn(_ workConn: any AsyncConnection, startMsg: FRPStartWorkConnMessage) async {
         do {
+            let activeWorkConn: any AsyncConnection
+            if config.useEncryption {
+                let encToken = (config.secretKey?.isEmpty == false ? config.secretKey : authToken) ?? ""
+                activeWorkConn = CryptoConnection(wrapping: workConn, token: encToken)
+            } else {
+                activeWorkConn = workConn
+            }
+
             let localConn: any AsyncConnection
             if let dialer = localDialer {
                 localConn = try await dialer(config.localIP, config.localPort)
@@ -59,7 +70,7 @@ public final class DefaultProxyHandler: ProxyHandler, @unchecked Sendable {
             }
 
             // Start bidirectional pump
-            await StreamBridge.bridge(workConn, localConn)
+            await StreamBridge.bridge(activeWorkConn, localConn)
         } catch {
             print("[Proxy \(config.name)] Failed to connect to local service at \(config.localIP):\(config.localPort): \(error)")
             workConn.close()

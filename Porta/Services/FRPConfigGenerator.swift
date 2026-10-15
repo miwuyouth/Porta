@@ -79,9 +79,13 @@ public final class FRPConfigGenerator {
         if trimmed == "SSH" { return "ssh" }
         if trimmed == "开发预览" { return "dev" }
 
-        // Remove spaces and punctuation
-        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
+        // Remove spaces, punctuation, and non-ASCII characters to satisfy FRP proxy naming rules
+        let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.")
         let filtered = trimmed.components(separatedBy: allowed.inverted).joined()
-        return filtered.isEmpty ? "proxy_\(abs(name.hashValue % 10000))" : filtered.lowercased()
+        if filtered.isEmpty {
+            let hashNum = abs(Int32(truncatingIfNeeded: name.hashValue) % 10000)
+            return "proxy_\(hashNum)"
+        }
+        return filtered.lowercased()
     }
 }

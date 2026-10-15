@@ -83,10 +83,12 @@ struct FRPClientCLI {
         do {
             try await service.start()
 
-            // Keep main loop alive
-            while true {
+            // Keep main loop alive and monitor connection state
+            while await service.isRunningStatus {
                 try await Task.sleep(nanoseconds: 1_000_000_000)
             }
+            print("FRP Client connection terminated.")
+            exit(1)
         } catch {
             print("FRP Client exited with error: \(error)")
             exit(1)

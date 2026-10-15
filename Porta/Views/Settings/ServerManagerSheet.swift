@@ -78,7 +78,7 @@ public struct ServerManagerSheet: View {
 
                             Divider()
 
-                            if let s = selectedServer, appState.servers.count > 1 {
+                            if selectedServer != nil, appState.servers.count > 1 {
                                 Button("删除服务器", role: .destructive) {
                                     deleteSelectedServer()
                                 }

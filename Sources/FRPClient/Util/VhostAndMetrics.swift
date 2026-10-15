@@ -28,7 +28,9 @@ public final class VhostRouter<T: Sendable>: @unchecked Sendable {
             }
 
             // 2. Wildcard match (*.example.com matches sub.example.com)
-            for (suffix, handler) in wildcardRoutes {
+            // Sort by suffix length descending so more specific wildcard (*.sub.example.com) matches before (*.example.com)
+            let sortedWildcards = wildcardRoutes.sorted { $0.key.count > $1.key.count }
+            for (suffix, handler) in sortedWildcards {
                 if lowerHost.hasSuffix("." + suffix) {
                     return handler
                 }

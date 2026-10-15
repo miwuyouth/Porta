@@ -17,7 +17,7 @@ public enum ConnectionStatus: Equatable {
     }
 }
 
-public final class FRPProcessManager: ObservableObject {
+public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
     public static let shared = FRPProcessManager()
 
     @Published public var status: ConnectionStatus = .disconnected
@@ -309,10 +309,12 @@ public final class FRPProcessManager: ObservableObject {
             var proxyTag: String? = nil
 
             let frpLogPattern = #"^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}(?:\.\d{3})?)\s+\[([A-Z])\]\s*(.*)$"#
+            var matchedFormat = false
             if let regex = try? NSRegularExpression(pattern: frpLogPattern) {
                 let nsLine = line as NSString
                 let matches = regex.matches(in: line, range: NSRange(location: 0, length: nsLine.length))
                 if let match = matches.first, match.numberOfRanges >= 4 {
+                    matchedFormat = true
                     let levelChar = nsLine.substring(with: match.range(at: 2))
                     let content = nsLine.substring(with: match.range(at: 3)).trimmingCharacters(in: .whitespaces)
 
@@ -325,7 +327,8 @@ public final class FRPProcessManager: ObservableObject {
 
                     displayMessage = content
                 }
-            } else {
+            }
+            if !matchedFormat {
                 let lower = line.lowercased()
                 if lower.contains("error") || lower.contains("failed") || lower.contains("fatal") {
                     level = .error

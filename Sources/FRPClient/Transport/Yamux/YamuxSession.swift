@@ -31,12 +31,20 @@ public final class YamuxSession: @unchecked Sendable {
         }
 
         // Send SYN frame to open stream on remote side (Yamux standard)
-        try await sendFrame(header: YamuxHeader(
-            type: .windowUpdate,
-            flags: .syn,
-            streamID: stream.id,
-            length: 0
-        ), payload: nil)
+        do {
+            try await sendFrame(header: YamuxHeader(
+                type: .windowUpdate,
+                flags: .syn,
+                streamID: stream.id,
+                length: 0
+            ), payload: nil)
+        } catch {
+            lock.withLock {
+                _ = streams.removeValue(forKey: stream.id)
+            }
+            stream.handleRemoteClose()
+            throw error
+        }
 
         return stream
     }
@@ -88,6 +96,8 @@ public final class YamuxSession: @unchecked Sendable {
         try await underlying.write(frameData)
     }
 
+    private static let maxFramePayloadSize: Int = 16 * 1024 * 1024 // 16MB limit
+ 
     private func startReceiveLoop() {
         receiveTask = Task { [weak self] in
             while let self = self, !Task.isCancelled {
@@ -99,6 +109,9 @@ public final class YamuxSession: @unchecked Sendable {
 
                     var payload: Data = Data()
                     if header.length > 0 && header.type == .data {
+                        guard header.length <= YamuxSession.maxFramePayloadSize else {
+                            break // Payload size exceeds safety limit
+                        }
                         payload = try await self.underlying.read(exactCount: Int(header.length))
                     }
 

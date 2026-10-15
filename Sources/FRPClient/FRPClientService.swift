@@ -65,7 +65,7 @@ public actor FRPClientService {
             self.proxyHandlers = handlers
         } else {
             for proxyCfg in config.proxies {
-                self.proxyHandlers[proxyCfg.name] = DefaultProxyHandler(config: proxyCfg)
+                self.proxyHandlers[proxyCfg.name] = DefaultProxyHandler(config: proxyCfg, authToken: config.auth.token)
             }
         }
     }
@@ -93,24 +93,14 @@ public actor FRPClientService {
             // 1. Perform Login
             try await performLogin(on: controlConnection)
 
-            // Wrap control connection in CryptoConnection for encrypted control stream
-            let activeControlConn: any AsyncConnection
-            if self.customConnector == nil {
-                let cryptoConn = CryptoConnection(wrapping: controlConnection, token: config.auth.token)
-                self.ctlConn = cryptoConn
-                activeControlConn = cryptoConn
-            } else {
-                activeControlConn = controlConnection
-            }
-
             // 2. Start receiving messages from control connection
-            startMessageLoop(on: activeControlConn)
+            startMessageLoop(on: controlConnection)
 
             // 3. Register Proxies
-            try await registerProxies(on: activeControlConn)
+            try await registerProxies(on: controlConnection)
 
             // 4. Start Heartbeat if needed
-            startHeartbeat(on: activeControlConn)
+            startHeartbeat(on: controlConnection)
 
             log("FRP 服务启动成功，所有代理就绪")
             onStatusChange?(true, nil)
@@ -225,7 +215,7 @@ public actor FRPClientService {
         guard interval > 0 else { return }
 
         let token = config.auth.token
-        let additionalScopes = config.auth.additionalScopes
+        let additionalScopes = config.auth.additionalScopes ?? (token.isEmpty ? [] : ["HeartBeats", "NewWorkConns"])
 
         heartbeatTask = Task {
             while !Task.isCancelled {
@@ -233,7 +223,7 @@ public actor FRPClientService {
 
                 let timestamp = Int64(Date().timeIntervalSince1970)
                 var ping = FRPPingMessage(timestamp: timestamp)
-                if let scopes = additionalScopes, scopes.contains("HeartBeats") {
+                if !token.isEmpty && additionalScopes.contains("HeartBeats") {
                     ping.privilegeKey = FRPAuth.getAuthKey(token: token, timestamp: timestamp)
                 }
 
@@ -309,11 +299,12 @@ public actor FRPClientService {
             let workConn = try await connector.connect()
 
             var newWorkConnMsg = FRPNewWorkConnMessage(runID: self.runID)
-            let additionalScopes = config.auth.additionalScopes ?? []
-            if additionalScopes.contains("NewWorkConns") {
+            let token = config.auth.token
+            let additionalScopes = config.auth.additionalScopes ?? (token.isEmpty ? [] : ["HeartBeats", "NewWorkConns"])
+            if !token.isEmpty && additionalScopes.contains("NewWorkConns") {
                 let timestamp = Int64(Date().timeIntervalSince1970)
                 newWorkConnMsg.timestamp = timestamp
-                newWorkConnMsg.privilegeKey = FRPAuth.getAuthKey(token: config.auth.token, timestamp: timestamp)
+                newWorkConnMsg.privilegeKey = FRPAuth.getAuthKey(token: token, timestamp: timestamp)
             }
 
             try await workConn.writeMessage(newWorkConnMsg)

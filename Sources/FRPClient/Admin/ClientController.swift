@@ -129,7 +129,8 @@ public final class FRPClientController: @unchecked Sendable {
         }
 
         if path.hasPrefix("/api/proxy/") {
-            let proxyName = String(path.dropFirst("/api/proxy/".count))
+            let rawProxyName = String(path.dropFirst("/api/proxy/".count))
+            let proxyName = rawProxyName.removingPercentEncoding ?? rawProxyName
             guard request.method == "GET" else {
                 return AdminResponse(statusCode: 405)
             }

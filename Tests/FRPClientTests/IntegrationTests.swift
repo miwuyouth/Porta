@@ -38,10 +38,8 @@ final class IntegrationTests: XCTestCase {
                         try await serverConn.writeMessage(resp)
                     }
 
-                    let cryptoServerConn = CryptoConnection(wrapping: serverConn, token: "secret_123")
-
                     // 2. Read NewProxy
-                    let msg2 = try await cryptoServerConn.readMessage()
+                    let msg2 = try await serverConn.readMessage()
                     if let proxy = msg2 as? FRPNewProxyMessage {
                         XCTAssertEqual(proxy.proxyName, "mock_tcp")
                         XCTAssertEqual(proxy.remotePort, 19000)
@@ -49,7 +47,7 @@ final class IntegrationTests: XCTestCase {
 
                         // Send NewProxyResp
                         let resp = FRPNewProxyRespMessage(proxyName: "mock_tcp", remoteAddr: "127.0.0.1:19000", error: nil)
-                        try await cryptoServerConn.writeMessage(resp)
+                        try await serverConn.writeMessage(resp)
                     }
                 } catch {
                     // Connection closed or done
