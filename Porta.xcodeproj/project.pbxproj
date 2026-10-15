@@ -7,113 +7,131 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0546697E6AE8439ADE7CCE7F /* StreamBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0057391872505D2CB269A3F2 /* StreamBridge.swift */; };
 		099142434AA1E2A67171F886 /* FRPLogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9613F7143D181501480ADDCA /* FRPLogEntry.swift */; };
+		0B806B1269A05ECDFF2F8670 /* AsyncConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CF9B7DEA4DE6E933E5DFAB8 /* AsyncConnection.swift */; };
 		0F2D7623846EDD46EB2FEEA0 /* WindowHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CCFC14539BFD482C0EFCF2 /* WindowHeaderView.swift */; };
 		103BC96F131795D5E667CF28 /* FRPProcessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EB40BA4B0E92DC9EE48129 /* FRPProcessManager.swift */; };
 		1AA9B32591E715C1233E1A19 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E23A2EECC9914989B8761188 /* LogManager.swift */; };
+		2097AF1890CA6577F839A03A /* VhostAndMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DCD37679AFB92D6B7F1533 /* VhostAndMetrics.swift */; };
+		3134330BC59369BFBA741ACA /* YamuxSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1439AFACFF40ED09F3F31B5E /* YamuxSession.swift */; };
+		357C5015E36D7FEB51DC1304 /* FRPClientService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A578970A558CB792A8E291 /* FRPClientService.swift */; };
 		45D2F21BD8C240719D598335 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435AB22D59945DC607770C3C /* AppSettings.swift */; };
 		47B1CA9839E74FC916351A83 /* StepperField.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD64154B4CF9FFF59F9B219C /* StepperField.swift */; };
+		54BFD8790B99910338CF4419 /* FRPMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BD261DDDED7832D85ECD1D2 /* FRPMessage.swift */; };
+		5C046878ED1E3D3F63CAA701 /* Lock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3630EFA0A992758951ADF2BB /* Lock.swift */; };
 		5F9D8DEEB402E4324EF18496 /* ServerHeaderRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F4BF4BD88B825133AC212E /* ServerHeaderRow.swift */; };
 		6205EFB1CEC8A7138E097CB2 /* LogRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16208608E81367FA4F2D9805 /* LogRowView.swift */; };
+		62C02A2FDB025D2329F3F890 /* ConfigManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA693B616C13FD9985DBD917 /* ConfigManager.swift */; };
+		69966A4E29F6BD3EC53E1AED /* NetUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = F507B84CABA0151E12B25467 /* NetUtil.swift */; };
 		6A53E38F754C868F4145BAA8 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C7DDEFE40616588487AA69 /* StorageService.swift */; };
 		723A2541A32E9A20A84E67C0 /* PortaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FD2B6CAC244C31BEB12CD11 /* PortaApp.swift */; };
+		74230BA84250AFF069D340C6 /* SimpleTOMLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1A32E30FF88E76EC75A031 /* SimpleTOMLParser.swift */; };
 		7721B4E3D6BDAB16A61FBCDE /* AddProxySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5A7776EBB6FF757CD92185D /* AddProxySheet.swift */; };
 		7ACAB53A2BCA4D02F99B3DB1 /* FRPProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = E914784965B8D2A56CBB0426 /* FRPProxy.swift */; };
+		7CE73794794250C25416DBB0 /* ConfigValidation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD11BAB4C7D00DE2CCAFD2E1 /* ConfigValidation.swift */; };
 		82168890D5A1E06B50492C2D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFC3B7501657303C7CF1402 /* ContentView.swift */; };
+		862944070769896D36CA57E2 /* UDPPacketCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3070207ECF688A206FD873B /* UDPPacketCodec.swift */; };
+		88C22CFB17F6AB989108B9C0 /* ProxyHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379ABF935C5E37D8936C3E7 /* ProxyHandler.swift */; };
 		8913CB635A0D84FECE05AC1D /* StatusIndicatorDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3DD3A3F4189446C8BA3D349 /* StatusIndicatorDot.swift */; };
+		92C60348254FB94B3B3F5444 /* CryptoConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 601019C4E03EE3671AFAE9DA /* CryptoConnection.swift */; };
+		979D584351398703ADB06B95 /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C25B823F3B75FF67058C72 /* PluginManager.swift */; };
+		97B9A22E9FF329E83F0505C2 /* YamuxFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 316B23D694A6DC4AB8B3260B /* YamuxFrame.swift */; };
+		9A9E5F1ABE6DDD455D459ED7 /* YamuxStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB169EE58EB745650D48CE4 /* YamuxStream.swift */; };
+		9BD3ADEEE14B1C7ADA27E19E /* Connector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D557869B7D34CC0FBCDAEA0 /* Connector.swift */; };
+		9E72FD4C5774AEE107916152 /* FRPConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28472050AE9118E0908A311D /* FRPConfig.swift */; };
 		9F1502A425CC6A6C53CDE949 /* ServerManagerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C3BFD6098D508582DC6C7BF /* ServerManagerSheet.swift */; };
+		A72DB623473A4087959F032E /* FRPAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E874469D06A658276EC37D /* FRPAuth.swift */; };
 		A79AD979E1AE6F363B523164 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2538359CF3F478CD528B2E7C /* Assets.xcassets */; };
+		AA751427B7DEAE5308E1EBE9 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 91E94D90C7E2E8CFF74BC2FE /* AppIcon.icns */; };
 		BB829737A3B11A6CC9A7D793 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F4AB93078E984DA63389763 /* AppState.swift */; };
 		C11E650A69D4C8979DFD9377 /* LogsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19F4AB634513CB6970D26D18 /* LogsView.swift */; };
 		C144B5660970FA4A8FA2E041 /* FRPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61601757465AA0E2B7C6B597 /* FRPServer.swift */; };
+		D03BC500B0D1188AC69A5C12 /* FRPFrameCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF35847D2F984C2C761A0ED /* FRPFrameCodec.swift */; };
+		D2C0F4DBCA14DEFD9F244BCB /* ConfigTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D109DC109C8F6BE786CCD0 /* ConfigTypes.swift */; };
 		D358D7A6ED720A9C938D87D8 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B510B1046A33D48318486D /* SettingsView.swift */; };
 		DADAB076371700EBDBDC9B9B /* ProxyRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A606DEB3D4A2435193C7ECF9 /* ProxyRowView.swift */; };
+		DE4BEFA067791C5A810F0CBD /* NWAsyncConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C630ADFD623ACFBF7E3590 /* NWAsyncConnection.swift */; };
 		F3DC9A72F5E7A47ABD6FBA1B /* FRPConfigGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F6BA7AAACCFFB8E441973DA /* FRPConfigGenerator.swift */; };
+		F3E38B7684BCEE9C033F6666 /* ClientController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B24DBF90E464B743555ABC7 /* ClientController.swift */; };
+		F5FCC75146ACAC0C68C690B1 /* ConfigSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F6BBBD0B92D00DBF3E6218 /* ConfigSource.swift */; };
 		F9C462FFBDCB50D79316B2FE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41B9FCA5D4F059E366FD9C66 /* AppDelegate.swift */; };
 		FEE9D09AC3ECDC83033C5B69 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D261055847318C84DBC30846 /* MainView.swift */; };
-		D9C5CA4E919872CACC976916 /* FRPClientService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A222E2A0F9BFF6ED30E46AE9 /* FRPClientService.swift */; };
-		A1544113EE70E942E6981193 /* FRPConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E191430B502016F819D277A5 /* FRPConfig.swift */; };
-		F7A2881252924D965A6E68E5 /* FRPMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8E04B95DDF0B750B161931 /* FRPMessage.swift */; };
-		DAC9BA4A8E5902279079855E /* FRPFrameCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E7915BCC9993161D0CAFC3 /* FRPFrameCodec.swift */; };
-		26E35AB7CE2D7E1E5495F17D /* FRPAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1563642C539C1E1A94F0EEBC /* FRPAuth.swift */; };
-		91728E38934C88228D2FCCB1 /* StreamBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346E41AFD983693265896AAC /* StreamBridge.swift */; };
-		8B80D2405F1D6E1A10BF74A6 /* ProxyHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B08F37EBBB3BE5EE80ADB3D0 /* ProxyHandler.swift */; };
-		2695D13E855A1211330045C2 /* AsyncConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8CF671C2E40E855C3D6B282 /* AsyncConnection.swift */; };
-		56B26A0B92683262FCD03073 /* Lock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26BB494EFF228A96F89A2466 /* Lock.swift */; };
-		544EC1704FE955E4A38A9262 /* Connector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603D2D0329787AC6446BD226 /* Connector.swift */; };
-		87E51C64D079E636D0B16975 /* NWAsyncConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 693013EA27399C6A993399EC /* NWAsyncConnection.swift */; };
-		15582768AF4E5312D1CA5426 /* YamuxSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75FA2DCBFC1F2CDDF9A295C /* YamuxSession.swift */; };
-		D79B61C272F283606A4A39B1 /* YamuxFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838D9FD1802EBB386E903606 /* YamuxFrame.swift */; };
-		C7219BF885DA87248EA26CC0 /* YamuxStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9133C613E0501D85D1D4B5DA /* YamuxStream.swift */; };
-		D5DF7A2FACAE021A00FDA18F /* SimpleTOMLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 543BD25FEE9486DC0C3A443F /* SimpleTOMLParser.swift */; };
-		0CDADA5F77020C353EB392B2 /* ClientController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BDAF6D178F373426D7F6CA3 /* ClientController.swift */; };
-		FC6D050BEB48A01A3BF96840 /* ConfigManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46CECF4E081947301203A568 /* ConfigManager.swift */; };
-		2ED653B4D09596180A6F3468 /* ConfigSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A17F74E114A24A22C53B133 /* ConfigSource.swift */; };
-		41755A86A64A419075C9EB04 /* ConfigTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A341440C1181A38DC88DCD44 /* ConfigTypes.swift */; };
-		245D1F7B420BCDCF76650386 /* ConfigValidation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0498EAA77A2AC25F2122FB /* ConfigValidation.swift */; };
-		81ACEEED17C99EA6683E33A3 /* PluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3828603A6358CB09E6BA9136 /* PluginManager.swift */; };
-		6C080919CBE99C35413A9A39 /* UDPPacketCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD2F41BF505F39EE4B655ADC /* UDPPacketCodec.swift */; };
-		0D7059DC638F2AA68BAD1F3E /* CryptoConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E0F469FF59B8F58174CCAA /* CryptoConnection.swift */; };
-		39FC3461CEA760BC5371B0A8 /* NetUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F2217003983DC431C01A5F /* NetUtil.swift */; };
-		6E2827165F72A57F7764F69D /* VhostAndMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3D38B9BBD2BB23DF26EF7 /* VhostAndMetrics.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0057391872505D2CB269A3F2 /* StreamBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamBridge.swift; sourceTree = "<group>"; };
 		01EB40BA4B0E92DC9EE48129 /* FRPProcessManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRPProcessManager.swift; sourceTree = "<group>"; };
 		05C7DDEFE40616588487AA69 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
+		1439AFACFF40ED09F3F31B5E /* YamuxSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YamuxSession.swift; sourceTree = "<group>"; };
 		16208608E81367FA4F2D9805 /* LogRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogRowView.swift; sourceTree = "<group>"; };
 		19F4AB634513CB6970D26D18 /* LogsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogsView.swift; sourceTree = "<group>"; };
 		2538359CF3F478CD528B2E7C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		28472050AE9118E0908A311D /* FRPConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRPConfig.swift; sourceTree = "<group>"; };
 		2FD2B6CAC244C31BEB12CD11 /* PortaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortaApp.swift; sourceTree = "<group>"; };
+		316B23D694A6DC4AB8B3260B /* YamuxFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YamuxFrame.swift; sourceTree = "<group>"; };
 		31B510B1046A33D48318486D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		35C630ADFD623ACFBF7E3590 /* NWAsyncConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWAsyncConnection.swift; sourceTree = "<group>"; };
+		3630EFA0A992758951ADF2BB /* Lock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lock.swift; sourceTree = "<group>"; };
+		3B24DBF90E464B743555ABC7 /* ClientController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientController.swift; sourceTree = "<group>"; };
+		3CB169EE58EB745650D48CE4 /* YamuxStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YamuxStream.swift; sourceTree = "<group>"; };
 		3F4AB93078E984DA63389763 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		41B9FCA5D4F059E366FD9C66 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		435AB22D59945DC607770C3C /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		4BD261DDDED7832D85ECD1D2 /* FRPMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRPMessage.swift; sourceTree = "<group>"; };
+		4D557869B7D34CC0FBCDAEA0 /* Connector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Connector.swift; sourceTree = "<group>"; };
 		53F4BF4BD88B825133AC212E /* ServerHeaderRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerHeaderRow.swift; sourceTree = "<group>"; };
+		5BF35847D2F984C2C761A0ED /* FRPFrameCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRPFrameCodec.swift; sourceTree = "<group>"; };
 		5CFC3B7501657303C7CF1402 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		601019C4E03EE3671AFAE9DA /* CryptoConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoConnection.swift; sourceTree = "<group>"; };
 		61601757465AA0E2B7C6B597 /* FRPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRPServer.swift; sourceTree = "<group>"; };
+		61E874469D06A658276EC37D /* FRPAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRPAuth.swift; sourceTree = "<group>"; };
 		65ED533FC763A573996AC8A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		68EBBA30CFD7B7569736562E /* Porta.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Porta.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C3BFD6098D508582DC6C7BF /* ServerManagerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerManagerSheet.swift; sourceTree = "<group>"; };
 		6F6BA7AAACCFFB8E441973DA /* FRPConfigGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRPConfigGenerator.swift; sourceTree = "<group>"; };
+		8CF9B7DEA4DE6E933E5DFAB8 /* AsyncConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncConnection.swift; sourceTree = "<group>"; };
+		91E94D90C7E2E8CFF74BC2FE /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9613F7143D181501480ADDCA /* FRPLogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRPLogEntry.swift; sourceTree = "<group>"; };
+		A3D109DC109C8F6BE786CCD0 /* ConfigTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigTypes.swift; sourceTree = "<group>"; };
 		A606DEB3D4A2435193C7ECF9 /* ProxyRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyRowView.swift; sourceTree = "<group>"; };
+		A9DCD37679AFB92D6B7F1533 /* VhostAndMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VhostAndMetrics.swift; sourceTree = "<group>"; };
+		B0A578970A558CB792A8E291 /* FRPClientService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRPClientService.swift; sourceTree = "<group>"; };
+		BC1A32E30FF88E76EC75A031 /* SimpleTOMLParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleTOMLParser.swift; sourceTree = "<group>"; };
 		BD64154B4CF9FFF59F9B219C /* StepperField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepperField.swift; sourceTree = "<group>"; };
 		C2CCFC14539BFD482C0EFCF2 /* WindowHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowHeaderView.swift; sourceTree = "<group>"; };
 		C5A7776EBB6FF757CD92185D /* AddProxySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddProxySheet.swift; sourceTree = "<group>"; };
 		D1811F7CFE6529AF88C2B374 /* Porta.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Porta.entitlements; sourceTree = "<group>"; };
 		D261055847318C84DBC30846 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		D3070207ECF688A206FD873B /* UDPPacketCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPacketCodec.swift; sourceTree = "<group>"; };
+		D379ABF935C5E37D8936C3E7 /* ProxyHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyHandler.swift; sourceTree = "<group>"; };
+		D4F6BBBD0B92D00DBF3E6218 /* ConfigSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigSource.swift; sourceTree = "<group>"; };
+		DD11BAB4C7D00DE2CCAFD2E1 /* ConfigValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigValidation.swift; sourceTree = "<group>"; };
 		E23A2EECC9914989B8761188 /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
 		E914784965B8D2A56CBB0426 /* FRPProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRPProxy.swift; sourceTree = "<group>"; };
+		EA693B616C13FD9985DBD917 /* ConfigManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigManager.swift; sourceTree = "<group>"; };
 		F3DD3A3F4189446C8BA3D349 /* StatusIndicatorDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicatorDot.swift; sourceTree = "<group>"; };
-		A222E2A0F9BFF6ED30E46AE9 /* FRPClientService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/FRPClientService.swift"; sourceTree = "<group>"; };
-		E191430B502016F819D277A5 /* FRPConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Model/FRPConfig.swift"; sourceTree = "<group>"; };
-		1D8E04B95DDF0B750B161931 /* FRPMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Model/FRPMessage.swift"; sourceTree = "<group>"; };
-		01E7915BCC9993161D0CAFC3 /* FRPFrameCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Protocol/FRPFrameCodec.swift"; sourceTree = "<group>"; };
-		1563642C539C1E1A94F0EEBC /* FRPAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Protocol/FRPAuth.swift"; sourceTree = "<group>"; };
-		346E41AFD983693265896AAC /* StreamBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Proxy/StreamBridge.swift"; sourceTree = "<group>"; };
-		B08F37EBBB3BE5EE80ADB3D0 /* ProxyHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Proxy/ProxyHandler.swift"; sourceTree = "<group>"; };
-		F8CF671C2E40E855C3D6B282 /* AsyncConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Transport/AsyncConnection.swift"; sourceTree = "<group>"; };
-		26BB494EFF228A96F89A2466 /* Lock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Transport/Lock.swift"; sourceTree = "<group>"; };
-		603D2D0329787AC6446BD226 /* Connector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Transport/Connector.swift"; sourceTree = "<group>"; };
-		693013EA27399C6A993399EC /* NWAsyncConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Transport/NWAsyncConnection.swift"; sourceTree = "<group>"; };
-		E75FA2DCBFC1F2CDDF9A295C /* YamuxSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Transport/Yamux/YamuxSession.swift"; sourceTree = "<group>"; };
-		838D9FD1802EBB386E903606 /* YamuxFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Transport/Yamux/YamuxFrame.swift"; sourceTree = "<group>"; };
-		9133C613E0501D85D1D4B5DA /* YamuxStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Transport/Yamux/YamuxStream.swift"; sourceTree = "<group>"; };
-		543BD25FEE9486DC0C3A443F /* SimpleTOMLParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Config/SimpleTOMLParser.swift"; sourceTree = "<group>"; };
-		1BDAF6D178F373426D7F6CA3 /* ClientController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Admin/ClientController.swift"; sourceTree = "<group>"; };
-		46CECF4E081947301203A568 /* ConfigManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Config/ConfigManager.swift"; sourceTree = "<group>"; };
-		8A17F74E114A24A22C53B133 /* ConfigSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Config/ConfigSource.swift"; sourceTree = "<group>"; };
-		A341440C1181A38DC88DCD44 /* ConfigTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Config/ConfigTypes.swift"; sourceTree = "<group>"; };
-		0C0498EAA77A2AC25F2122FB /* ConfigValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Config/ConfigValidation.swift"; sourceTree = "<group>"; };
-		3828603A6358CB09E6BA9136 /* PluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Plugin/PluginManager.swift"; sourceTree = "<group>"; };
-		CD2F41BF505F39EE4B655ADC /* UDPPacketCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Protocol/UDPPacketCodec.swift"; sourceTree = "<group>"; };
-		69E0F469FF59B8F58174CCAA /* CryptoConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Transport/CryptoConnection.swift"; sourceTree = "<group>"; };
-		34F2217003983DC431C01A5F /* NetUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Util/NetUtil.swift"; sourceTree = "<group>"; };
-		26D3D38B9BBD2BB23DF26EF7 /* VhostAndMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/FRPClient/Util/VhostAndMetrics.swift"; sourceTree = "<group>"; };
+		F507B84CABA0151E12B25467 /* NetUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetUtil.swift; sourceTree = "<group>"; };
+		F6C25B823F3B75FF67058C72 /* PluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		03EBCF8918154E704B4B3E7E /* Admin */ = {
+			isa = PBXGroup;
+			children = (
+				3B24DBF90E464B743555ABC7 /* ClientController.swift */,
+			);
+			path = Admin;
+			sourceTree = "<group>";
+		};
+		06E1232FFF86B331CCD6A0CE /* Plugin */ = {
+			isa = PBXGroup;
+			children = (
+				F6C25B823F3B75FF67058C72 /* PluginManager.swift */,
+			);
+			path = Plugin;
+			sourceTree = "<group>";
+		};
 		0B4B278FEFE9D125DC538F4B /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -122,9 +140,27 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		0DD2F6661F47A808FA58EE27 /* Util */ = {
+			isa = PBXGroup;
+			children = (
+				F507B84CABA0151E12B25467 /* NetUtil.swift */,
+				A9DCD37679AFB92D6B7F1533 /* VhostAndMetrics.swift */,
+			);
+			path = Util;
+			sourceTree = "<group>";
+		};
+		1E38DD14177F3CE00662024E /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				ED6AE276E79BB318E1665A54 /* FRPClient */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
 		3A0ED75102A361D71AE4886C /* Porta */ = {
 			isa = PBXGroup;
 			children = (
+				91E94D90C7E2E8CFF74BC2FE /* AppIcon.icns */,
 				2538359CF3F478CD528B2E7C /* Assets.xcassets */,
 				65ED533FC763A573996AC8A5 /* Info.plist */,
 				D1811F7CFE6529AF88C2B374 /* Porta.entitlements */,
@@ -147,6 +183,25 @@
 			path = Main;
 			sourceTree = "<group>";
 		};
+		413DACD4B77F2576400847D2 /* Yamux */ = {
+			isa = PBXGroup;
+			children = (
+				316B23D694A6DC4AB8B3260B /* YamuxFrame.swift */,
+				1439AFACFF40ED09F3F31B5E /* YamuxSession.swift */,
+				3CB169EE58EB745650D48CE4 /* YamuxStream.swift */,
+			);
+			path = Yamux;
+			sourceTree = "<group>";
+		};
+		49FAEA9A85A0136F0D8A5B66 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				28472050AE9118E0908A311D /* FRPConfig.swift */,
+				4BD261DDDED7832D85ECD1D2 /* FRPMessage.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		65B561C771B1EE69145EF4D3 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -160,6 +215,18 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		6C56178681516AA821BFDA9D /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				EA693B616C13FD9985DBD917 /* ConfigManager.swift */,
+				D4F6BBBD0B92D00DBF3E6218 /* ConfigSource.swift */,
+				A3D109DC109C8F6BE786CCD0 /* ConfigTypes.swift */,
+				DD11BAB4C7D00DE2CCAFD2E1 /* ConfigValidation.swift */,
+				BC1A32E30FF88E76EC75A031 /* SimpleTOMLParser.swift */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 		77D1AD362D5D10A838E04E3B /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -170,11 +237,33 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		7D28530EAEE39111E157E7FE /* Proxy */ = {
+			isa = PBXGroup;
+			children = (
+				D379ABF935C5E37D8936C3E7 /* ProxyHandler.swift */,
+				0057391872505D2CB269A3F2 /* StreamBridge.swift */,
+			);
+			path = Proxy;
+			sourceTree = "<group>";
+		};
+		853EDC6661CF680A88891A96 /* Transport */ = {
+			isa = PBXGroup;
+			children = (
+				8CF9B7DEA4DE6E933E5DFAB8 /* AsyncConnection.swift */,
+				4D557869B7D34CC0FBCDAEA0 /* Connector.swift */,
+				601019C4E03EE3671AFAE9DA /* CryptoConnection.swift */,
+				3630EFA0A992758951ADF2BB /* Lock.swift */,
+				35C630ADFD623ACFBF7E3590 /* NWAsyncConnection.swift */,
+				413DACD4B77F2576400847D2 /* Yamux */,
+			);
+			path = Transport;
+			sourceTree = "<group>";
+		};
 		8CF044F6253E1BBA8DC6455B = {
 			isa = PBXGroup;
 			children = (
-				DD5DD171BB4EF2CC3EEC6D5E /* FRPClient */,
 				3A0ED75102A361D71AE4886C /* Porta */,
+				1E38DD14177F3CE00662024E /* Sources */,
 				0B4B278FEFE9D125DC538F4B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -197,6 +286,16 @@
 				05C7DDEFE40616588487AA69 /* StorageService.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		AF0FEFFFA5ADC1AA9905E9B8 /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				61E874469D06A658276EC37D /* FRPAuth.swift */,
+				5BF35847D2F984C2C761A0ED /* FRPFrameCodec.swift */,
+				D3070207ECF688A206FD873B /* UDPPacketCodec.swift */,
+			);
+			path = Protocol;
 			sourceTree = "<group>";
 		};
 		B66E10BBD96DC2BF4C5BE707 /* Models */ = {
@@ -228,36 +327,20 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
-		DD5DD171BB4EF2CC3EEC6D5E /* FRPClient */ = {
+		ED6AE276E79BB318E1665A54 /* FRPClient */ = {
 			isa = PBXGroup;
 			children = (
-				1BDAF6D178F373426D7F6CA3 /* ClientController.swift */,
-				46CECF4E081947301203A568 /* ConfigManager.swift */,
-				8A17F74E114A24A22C53B133 /* ConfigSource.swift */,
-				A341440C1181A38DC88DCD44 /* ConfigTypes.swift */,
-				0C0498EAA77A2AC25F2122FB /* ConfigValidation.swift */,
-				3828603A6358CB09E6BA9136 /* PluginManager.swift */,
-				CD2F41BF505F39EE4B655ADC /* UDPPacketCodec.swift */,
-				69E0F469FF59B8F58174CCAA /* CryptoConnection.swift */,
-				34F2217003983DC431C01A5F /* NetUtil.swift */,
-				26D3D38B9BBD2BB23DF26EF7 /* VhostAndMetrics.swift */,
-				A222E2A0F9BFF6ED30E46AE9 /* FRPClientService.swift */,
-				E191430B502016F819D277A5 /* FRPConfig.swift */,
-				1D8E04B95DDF0B750B161931 /* FRPMessage.swift */,
-				01E7915BCC9993161D0CAFC3 /* FRPFrameCodec.swift */,
-				1563642C539C1E1A94F0EEBC /* FRPAuth.swift */,
-				346E41AFD983693265896AAC /* StreamBridge.swift */,
-				B08F37EBBB3BE5EE80ADB3D0 /* ProxyHandler.swift */,
-				F8CF671C2E40E855C3D6B282 /* AsyncConnection.swift */,
-				26BB494EFF228A96F89A2466 /* Lock.swift */,
-				603D2D0329787AC6446BD226 /* Connector.swift */,
-				693013EA27399C6A993399EC /* NWAsyncConnection.swift */,
-				E75FA2DCBFC1F2CDDF9A295C /* YamuxSession.swift */,
-				838D9FD1802EBB386E903606 /* YamuxFrame.swift */,
-				9133C613E0501D85D1D4B5DA /* YamuxStream.swift */,
-				543BD25FEE9486DC0C3A443F /* SimpleTOMLParser.swift */,
+				B0A578970A558CB792A8E291 /* FRPClientService.swift */,
+				03EBCF8918154E704B4B3E7E /* Admin */,
+				6C56178681516AA821BFDA9D /* Config */,
+				49FAEA9A85A0136F0D8A5B66 /* Model */,
+				06E1232FFF86B331CCD6A0CE /* Plugin */,
+				AF0FEFFFA5ADC1AA9905E9B8 /* Protocol */,
+				7D28530EAEE39111E157E7FE /* Proxy */,
+				853EDC6661CF680A88891A96 /* Transport */,
+				0DD2F6661F47A808FA58EE27 /* Util */,
 			);
-			name = FRPClient;
+			path = FRPClient;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -314,6 +397,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA751427B7DEAE5308E1EBE9 /* AppIcon.icns in Resources */,
 				A79AD979E1AE6F363B523164 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -325,54 +409,54 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0CDADA5F77020C353EB392B2 /* ClientController.swift in Sources */,
-				FC6D050BEB48A01A3BF96840 /* ConfigManager.swift in Sources */,
-				2ED653B4D09596180A6F3468 /* ConfigSource.swift in Sources */,
-				41755A86A64A419075C9EB04 /* ConfigTypes.swift in Sources */,
-				245D1F7B420BCDCF76650386 /* ConfigValidation.swift in Sources */,
-				81ACEEED17C99EA6683E33A3 /* PluginManager.swift in Sources */,
-				6C080919CBE99C35413A9A39 /* UDPPacketCodec.swift in Sources */,
-				0D7059DC638F2AA68BAD1F3E /* CryptoConnection.swift in Sources */,
-				39FC3461CEA760BC5371B0A8 /* NetUtil.swift in Sources */,
-				6E2827165F72A57F7764F69D /* VhostAndMetrics.swift in Sources */,
-				D9C5CA4E919872CACC976916 /* FRPClientService.swift in Sources */,
-				A1544113EE70E942E6981193 /* FRPConfig.swift in Sources */,
-				F7A2881252924D965A6E68E5 /* FRPMessage.swift in Sources */,
-				DAC9BA4A8E5902279079855E /* FRPFrameCodec.swift in Sources */,
-				26E35AB7CE2D7E1E5495F17D /* FRPAuth.swift in Sources */,
-				91728E38934C88228D2FCCB1 /* StreamBridge.swift in Sources */,
-				8B80D2405F1D6E1A10BF74A6 /* ProxyHandler.swift in Sources */,
-				2695D13E855A1211330045C2 /* AsyncConnection.swift in Sources */,
-				56B26A0B92683262FCD03073 /* Lock.swift in Sources */,
-				544EC1704FE955E4A38A9262 /* Connector.swift in Sources */,
-				87E51C64D079E636D0B16975 /* NWAsyncConnection.swift in Sources */,
-				15582768AF4E5312D1CA5426 /* YamuxSession.swift in Sources */,
-				D79B61C272F283606A4A39B1 /* YamuxFrame.swift in Sources */,
-				C7219BF885DA87248EA26CC0 /* YamuxStream.swift in Sources */,
-				D5DF7A2FACAE021A00FDA18F /* SimpleTOMLParser.swift in Sources */,
 				7721B4E3D6BDAB16A61FBCDE /* AddProxySheet.swift in Sources */,
 				F9C462FFBDCB50D79316B2FE /* AppDelegate.swift in Sources */,
 				45D2F21BD8C240719D598335 /* AppSettings.swift in Sources */,
 				BB829737A3B11A6CC9A7D793 /* AppState.swift in Sources */,
+				0B806B1269A05ECDFF2F8670 /* AsyncConnection.swift in Sources */,
+				F3E38B7684BCEE9C033F6666 /* ClientController.swift in Sources */,
+				62C02A2FDB025D2329F3F890 /* ConfigManager.swift in Sources */,
+				F5FCC75146ACAC0C68C690B1 /* ConfigSource.swift in Sources */,
+				D2C0F4DBCA14DEFD9F244BCB /* ConfigTypes.swift in Sources */,
+				7CE73794794250C25416DBB0 /* ConfigValidation.swift in Sources */,
+				9BD3ADEEE14B1C7ADA27E19E /* Connector.swift in Sources */,
 				82168890D5A1E06B50492C2D /* ContentView.swift in Sources */,
+				92C60348254FB94B3B3F5444 /* CryptoConnection.swift in Sources */,
+				A72DB623473A4087959F032E /* FRPAuth.swift in Sources */,
+				357C5015E36D7FEB51DC1304 /* FRPClientService.swift in Sources */,
+				9E72FD4C5774AEE107916152 /* FRPConfig.swift in Sources */,
 				F3DC9A72F5E7A47ABD6FBA1B /* FRPConfigGenerator.swift in Sources */,
+				D03BC500B0D1188AC69A5C12 /* FRPFrameCodec.swift in Sources */,
 				099142434AA1E2A67171F886 /* FRPLogEntry.swift in Sources */,
+				54BFD8790B99910338CF4419 /* FRPMessage.swift in Sources */,
 				103BC96F131795D5E667CF28 /* FRPProcessManager.swift in Sources */,
 				7ACAB53A2BCA4D02F99B3DB1 /* FRPProxy.swift in Sources */,
 				C144B5660970FA4A8FA2E041 /* FRPServer.swift in Sources */,
+				5C046878ED1E3D3F63CAA701 /* Lock.swift in Sources */,
 				1AA9B32591E715C1233E1A19 /* LogManager.swift in Sources */,
 				6205EFB1CEC8A7138E097CB2 /* LogRowView.swift in Sources */,
 				C11E650A69D4C8979DFD9377 /* LogsView.swift in Sources */,
 				FEE9D09AC3ECDC83033C5B69 /* MainView.swift in Sources */,
+				DE4BEFA067791C5A810F0CBD /* NWAsyncConnection.swift in Sources */,
+				69966A4E29F6BD3EC53E1AED /* NetUtil.swift in Sources */,
+				979D584351398703ADB06B95 /* PluginManager.swift in Sources */,
 				723A2541A32E9A20A84E67C0 /* PortaApp.swift in Sources */,
+				88C22CFB17F6AB989108B9C0 /* ProxyHandler.swift in Sources */,
 				DADAB076371700EBDBDC9B9B /* ProxyRowView.swift in Sources */,
 				5F9D8DEEB402E4324EF18496 /* ServerHeaderRow.swift in Sources */,
 				9F1502A425CC6A6C53CDE949 /* ServerManagerSheet.swift in Sources */,
 				D358D7A6ED720A9C938D87D8 /* SettingsView.swift in Sources */,
+				74230BA84250AFF069D340C6 /* SimpleTOMLParser.swift in Sources */,
 				8913CB635A0D84FECE05AC1D /* StatusIndicatorDot.swift in Sources */,
 				47B1CA9839E74FC916351A83 /* StepperField.swift in Sources */,
 				6A53E38F754C868F4145BAA8 /* StorageService.swift in Sources */,
+				0546697E6AE8439ADE7CCE7F /* StreamBridge.swift in Sources */,
+				862944070769896D36CA57E2 /* UDPPacketCodec.swift in Sources */,
+				2097AF1890CA6577F839A03A /* VhostAndMetrics.swift in Sources */,
 				0F2D7623846EDD46EB2FEEA0 /* WindowHeaderView.swift in Sources */,
+				97B9A22E9FF329E83F0505C2 /* YamuxFrame.swift in Sources */,
+				3134330BC59369BFBA741ACA /* YamuxSession.swift in Sources */,
+				9A9E5F1ABE6DDD455D459ED7 /* YamuxStream.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -505,6 +589,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Porta/Porta.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = dev;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = Porta/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -512,6 +597,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.porta.frp;
 				PRODUCT_NAME = Porta;
 				SDKROOT = macosx;
@@ -526,6 +612,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Porta/Porta.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = dev;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = Porta/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -533,6 +620,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.porta.frp;
 				PRODUCT_NAME = Porta;
 				SDKROOT = macosx;

@@ -17,7 +17,14 @@ public struct AppSettings: Codable, Equatable {
     public var customFrpcPath: String = ""
 
     // 版本信息
-    public static let appVersion: String = "1.0.0"
+    public static var appVersion: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
+        if build.isEmpty || build == "1" {
+            return version
+        }
+        return "\(version) (\(build))"
+    }
     public static let frpcVersion: String = "0.65.0 (Swift)"
 
     public init() {}
