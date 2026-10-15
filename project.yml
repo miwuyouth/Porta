@@ -1,0 +1,26 @@
+name: Porta
+options:
+  bundleIdPrefix: com.porta
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "15.0"
+  createIntermediateGroups: true
+targets:
+  Porta:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Porta
+      - path: Sources/FRPClient
+    settings:
+      base:
+        PRODUCT_NAME: Porta
+        PRODUCT_BUNDLE_IDENTIFIER: com.porta.frp
+        INFOPLIST_FILE: Porta/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Porta/Porta.entitlements
+        SWIFT_VERSION: "5.9"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ENABLE_HARDENED_RUNTIME: NO
