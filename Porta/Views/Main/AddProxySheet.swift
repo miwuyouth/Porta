@@ -178,9 +178,11 @@ public struct AddProxySheet: View {
         .background(Color(nsColor: .windowBackgroundColor))
         .onAppear {
             if let p = editingProxy {
-                name = p.name
-                type = p.type
-                iconSymbol = p.iconSymbol
+                if p.iconSymbol == "chevron.left.forwardslash.chevron.right" {
+                    iconSymbol = "code"
+                } else {
+                    iconSymbol = p.iconSymbol
+                }
                 localIP = p.localIP
                 localPort = "\(p.localPort)"
                 remotePort = p.remotePort.map { "\($0)" } ?? ""

@@ -27,6 +27,13 @@ public final class FRPProcessManager: ObservableObject {
     private var clientService: FRPClientService?
     private var serviceTask: Task<Void, Never>?
 
+    // Auto-reconnect & state management
+    private var lastServer: FRPServer?
+    private var lastProxies: [FRPProxy] = []
+    private var lastSettings: AppSettings?
+    private var isExplicitlyStopped: Bool = true
+    private var reconnectWorkItem: DispatchWorkItem?
+
     // Optional external process override (if user specified customFrpcPath)
     private var process: Process?
     private var stdoutPipe: Pipe?
@@ -37,7 +44,15 @@ public final class FRPProcessManager: ObservableObject {
     }
 
     public func start(server: FRPServer, proxies: [FRPProxy], settings: AppSettings) {
-        stop()
+        reconnectWorkItem?.cancel()
+        reconnectWorkItem = nil
+        isExplicitlyStopped = false
+
+        lastServer = server
+        lastProxies = proxies
+        lastSettings = settings
+
+        stopInternal()
 
         status = .connecting
         LogManager.shared.add(level: .info, proxyTag: nil, message: "正在启动 Swift 原生 FRP 引擎...")
@@ -64,11 +79,11 @@ public final class FRPProcessManager: ObservableObject {
             let proxyType: FRPProxyType
             switch proxy.type {
             case .tcp: proxyType = .tcp
-            case .udp: proxyType = .tcp
+            case .udp: proxyType = .udp
             case .http: proxyType = .http
             case .https: proxyType = .https
             case .stcp: proxyType = .stcp
-            case .xtcp: proxyType = .tcp
+            case .xtcp: proxyType = .xtcp
             }
 
             let domains = proxy.customDomains?
@@ -128,15 +143,18 @@ public final class FRPProcessManager: ObservableObject {
             },
             onStatusChange: { [weak self] isConnected, errorMsg in
                 DispatchQueue.main.async {
+                    guard let self = self else { return }
                     if isConnected {
-                        self?.isRunning = true
-                        self?.status = .connected
+                        self.isRunning = true
+                        self.status = .connected
                     } else if let err = errorMsg {
-                        self?.isRunning = false
-                        self?.status = .error(err)
+                        self.isRunning = false
+                        self.status = .error(err)
+                        self.scheduleReconnect()
                     } else {
-                        self?.isRunning = false
-                        self?.status = .disconnected
+                        self.isRunning = false
+                        self.status = .disconnected
+                        self.scheduleReconnect()
                     }
                 }
             }
@@ -146,16 +164,18 @@ public final class FRPProcessManager: ObservableObject {
         self.isRunning = true
 
         self.serviceTask = Task { [weak self, weak service] in
+            guard let self = self else { return }
             do {
                 try await service?.start()
                 await MainActor.run {
-                    self?.isRunning = true
-                    self?.status = .connected
+                    self.isRunning = true
+                    self.status = .connected
                 }
             } catch {
                 await MainActor.run {
-                    self?.isRunning = false
-                    self?.status = .error(error.localizedDescription)
+                    self.isRunning = false
+                    self.status = .error(error.localizedDescription)
+                    self.scheduleReconnect()
                 }
                 LogManager.shared.add(level: .error, proxyTag: nil, message: "启动失败: \(error.localizedDescription)")
             }
@@ -179,9 +199,11 @@ public final class FRPProcessManager: ObservableObject {
 
         p.terminationHandler = { [weak self] proc in
             DispatchQueue.main.async {
-                self?.isRunning = false
-                self?.status = .disconnected
+                guard let self = self else { return }
+                self.isRunning = false
+                self.status = .disconnected
                 LogManager.shared.add(level: .warn, proxyTag: nil, message: "FRP 进程已退出 (code: \(proc.terminationStatus))")
+                self.scheduleReconnect()
             }
         }
 
@@ -198,7 +220,7 @@ public final class FRPProcessManager: ObservableObject {
         }
     }
 
-    public func stop() {
+    private func stopInternal() {
         serviceTask?.cancel()
         serviceTask = nil
 
@@ -218,7 +240,31 @@ public final class FRPProcessManager: ObservableObject {
 
         isRunning = false
         status = .disconnected
+    }
+
+    public func stop() {
+        isExplicitlyStopped = true
+        reconnectWorkItem?.cancel()
+        reconnectWorkItem = nil
+
+        stopInternal()
         LogManager.shared.add(level: .info, proxyTag: nil, message: "已断开连接")
+    }
+
+    private func scheduleReconnect() {
+        guard !isExplicitlyStopped, let server = lastServer, let settings = lastSettings, settings.autoReconnect else {
+            return
+        }
+        reconnectWorkItem?.cancel()
+        let interval = max(1, settings.retryIntervalSeconds)
+        LogManager.shared.add(level: .warn, proxyTag: nil, message: "\(interval) 秒后尝试自动重新连接...")
+
+        let item = DispatchWorkItem { [weak self] in
+            guard let self = self, !self.isExplicitlyStopped else { return }
+            self.start(server: server, proxies: self.lastProxies, settings: settings)
+        }
+        reconnectWorkItem = item
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(interval), execute: item)
     }
 
     public func notifyProxyToggled(proxy: FRPProxy) {

@@ -1,4 +1,5 @@
 import SwiftUI
+import ServiceManagement
 
 public struct SettingsView: View {
     @ObservedObject var appState: AppState = .shared
@@ -235,11 +236,32 @@ public struct SettingsView: View {
                 .toggleStyle(.switch)
                 .tint(Color(red: 0.0, green: 0.48, blue: 1.0))
                 .labelsHidden()
-                .onChange(of: isOn.wrappedValue) { _ in
+                .onChange(of: isOn.wrappedValue) { newValue in
                     appState.saveData()
+                    if title == "登录时启动" {
+                        updateLaunchAtLogin(enabled: newValue)
+                    }
                 }
         }
         .padding(.horizontal, 28)
         .padding(.vertical, 8)
+    }
+
+    private func updateLaunchAtLogin(enabled: Bool) {
+        if #available(macOS 13.0, *) {
+            do {
+                if enabled {
+                    if SMAppService.mainApp.status != .enabled {
+                        try SMAppService.mainApp.register()
+                    }
+                } else {
+                    if SMAppService.mainApp.status == .enabled {
+                        try SMAppService.mainApp.unregister()
+                    }
+                }
+            } catch {
+                print("[Settings] Failed to update launchAtLogin: \(error)")
+            }
+        }
     }
 }

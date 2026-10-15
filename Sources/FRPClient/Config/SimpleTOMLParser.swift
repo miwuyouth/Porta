@@ -7,6 +7,7 @@ public enum SimpleTOMLParser {
         var user = ""
         var authToken = ""
         var authMethod = "token"
+        var protocolType = "tcp"
         var tcpMux = true
         var tlsEnable = false
         var tlsServerName: String?
@@ -116,6 +117,8 @@ public enum SimpleTOMLParser {
                 if let s = val as? String { authMethod = s }
             case "auth.additionalscopes", "auth.additional_scopes", "additionalscopes", "additional_scopes":
                 if let arr = val as? [String] { authAdditionalScopes = arr }
+            case "transport.protocol", "transport_protocol", "protocol":
+                if let s = val as? String { protocolType = s }
             case "transport.tcpmux", "tcpmux":
                 if let b = val as? Bool { tcpMux = b }
             case "transport.tls.enable", "tls.enable", "tls_enable":
@@ -145,6 +148,7 @@ public enum SimpleTOMLParser {
             additionalScopes: authAdditionalScopes
         )
         let transportConfig = FRPTransportConfig(
+            protocolType: protocolType,
             tcpMux: tcpMux,
             tlsEnable: tlsEnable,
             tlsServerName: tlsServerName,
