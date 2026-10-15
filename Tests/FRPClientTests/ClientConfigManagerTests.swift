@@ -72,6 +72,16 @@ final class ClientConfigManagerTests: XCTestCase {
         XCTAssertEqual(diff.modified, ["modify"])
     }
 
+    func testConfigManagerCalculateDiffWithDuplicateProxiesDoesNotCrash() {
+        let p1 = FRPProxyConfig(name: "dup", localPort: 80)
+        let p2 = FRPProxyConfig(name: "dup", localPort: 90)
+        let manager = ConfigManager(config: FRPClientConfig(proxies: []))
+
+        let newConfig = FRPClientConfig(proxies: [p1, p2])
+        let diff = manager.calculateDiff(newConfig: newConfig)
+        XCTAssertEqual(diff.added, ["dup"])
+    }
+
     func testConfigManagerVisitorAddAndLookup() throws {
         let manager = ConfigManager(config: FRPClientConfig())
         let visitor = VisitorConfig(

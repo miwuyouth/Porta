@@ -20,6 +20,10 @@ final class PluginAndNatholeTests: XCTestCase {
         // Directory traversal attack attempt
         let traversal = plugin.resolvePath("/static/../../etc/passwd")
         XCTAssertNil(traversal)
+
+        // Sibling directory traversal attempt (/var/www vs /var/www-secret)
+        let siblingTraversal = plugin.resolvePath("/static/../html-secret/passwords.txt")
+        XCTAssertNil(siblingTraversal)
     }
 
     func testUnixDomainSocketPluginConfig() {

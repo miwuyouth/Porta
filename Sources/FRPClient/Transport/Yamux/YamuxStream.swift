@@ -114,16 +114,22 @@ public final class YamuxStream: AsyncConnection, @unchecked Sendable {
         }
 
         return try await withCheckedThrowingContinuation { continuation in
-            let added = lock.withLock { () -> Bool in
+            let immediateInsideLock: Data? = lock.withLock {
+                if !readBuffer.isEmpty {
+                    let count = min(maxCount, readBuffer.count)
+                    let chunk = readBuffer.prefix(count)
+                    readBuffer.removeFirst(count)
+                    return Data(chunk)
+                }
                 if _isClosed {
-                    return false
+                    return Data()
                 }
                 readWaiters.append(ReadWaiter(maxCount: maxCount, continuation: continuation))
-                return true
+                return nil
             }
 
-            if !added {
-                continuation.resume(returning: Data())
+            if let data = immediateInsideLock {
+                continuation.resume(returning: data)
             }
         }
     }

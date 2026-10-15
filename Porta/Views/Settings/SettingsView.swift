@@ -70,6 +70,9 @@ public struct SettingsView: View {
                             }
                             .padding(.horizontal, 28)
                             .padding(.vertical, 8)
+                            .onChange(of: appState.settings.retryIntervalSeconds) { _ in
+                                appState.saveData()
+                            }
 
                             Divider().padding(.horizontal, 28)
 
@@ -82,6 +85,9 @@ public struct SettingsView: View {
                             }
                             .padding(.horizontal, 28)
                             .padding(.vertical, 8)
+                            .onChange(of: appState.settings.connectTimeoutSeconds) { _ in
+                                appState.saveData()
+                            }
                         }
                     }
 

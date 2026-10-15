@@ -29,8 +29,10 @@ public final class LogManager: ObservableObject {
             }
             // Filter by proxy
             if selectedProxyFilter != "全部代理" {
-                if let tag = entry.proxyTag {
-                    let matchesTag = selectedProxyFilter.lowercased().contains(tag.lowercased()) || tag.lowercased().contains(selectedProxyFilter.lowercased())
+                if let tag = entry.proxyTag?.lowercased() {
+                    let filterLower = selectedProxyFilter.lowercased()
+                    let filterTag = FRPConfigGenerator.sanitizeProxyName(selectedProxyFilter).lowercased()
+                    let matchesTag = (tag == filterLower || tag == filterTag || filterLower.contains(tag) || tag.contains(filterLower))
                     if !matchesTag { return false }
                 } else {
                     return false

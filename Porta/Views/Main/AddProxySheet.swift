@@ -196,7 +196,10 @@ public struct AddProxySheet: View {
 
     private func saveProxy() {
         let lPort = Int(localPort) ?? 8080
-        let rPort = Int(remotePort)
+        let isHTTP = (type == .http || type == .https)
+        let rPort = isHTTP ? nil : Int(remotePort)
+        let cDomains = isHTTP ? (customDomains.isEmpty ? nil : customDomains) : nil
+        let sDomain = isHTTP ? (subdomain.isEmpty ? nil : subdomain) : nil
 
         let targetIcon = iconSymbol == "code" ? "chevron.left.forwardslash.chevron.right" : iconSymbol
 
@@ -207,8 +210,8 @@ public struct AddProxySheet: View {
             existing.localIP = localIP.isEmpty ? "127.0.0.1" : localIP
             existing.localPort = lPort
             existing.remotePort = rPort
-            existing.customDomains = customDomains.isEmpty ? nil : customDomains
-            existing.subdomain = subdomain.isEmpty ? nil : subdomain
+            existing.customDomains = cDomains
+            existing.subdomain = sDomain
             existing.useEncryption = useEncryption
             existing.useCompression = useCompression
             appState.updateProxy(existing)
@@ -221,8 +224,8 @@ public struct AddProxySheet: View {
                 localIP: localIP.isEmpty ? "127.0.0.1" : localIP,
                 localPort: lPort,
                 remotePort: rPort,
-                customDomains: customDomains.isEmpty ? nil : customDomains,
-                subdomain: subdomain.isEmpty ? nil : subdomain,
+                customDomains: cDomains,
+                subdomain: sDomain,
                 isEnabled: true,
                 useEncryption: useEncryption,
                 useCompression: useCompression

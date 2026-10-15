@@ -148,6 +148,12 @@ public actor FRPClientService {
         onStatusChange?(false, nil)
     }
 
+    /// Detaches callbacks so that asynchronous teardown does not affect new service instances.
+    public func detachCallbacks() {
+        self.onLog = nil
+        self.onStatusChange = nil
+    }
+
     private func performLogin(on connection: any AsyncConnection) async throws {
         let timestamp = Int64(Date().timeIntervalSince1970)
         let privilegeKey = FRPAuth.getAuthKey(token: config.auth.token, timestamp: timestamp)
@@ -325,7 +331,24 @@ public actor FRPClientService {
                 return
             }
 
-            guard let handler = proxyHandlers[startMsg.proxyName] ?? proxyHandlers.values.first else {
+            let requestedName = startMsg.proxyName
+            var resolvedHandler: (any ProxyHandler)? = proxyHandlers[requestedName]
+
+            if resolvedHandler == nil && !config.user.isEmpty && requestedName.hasPrefix("\(config.user).") {
+                let stripped = String(requestedName.dropFirst(config.user.count + 1))
+                resolvedHandler = proxyHandlers[stripped]
+            }
+
+            if resolvedHandler == nil {
+                for (key, handler) in proxyHandlers {
+                    if requestedName.hasSuffix(key) || key.hasSuffix(requestedName) || key.caseInsensitiveCompare(requestedName) == .orderedSame {
+                        resolvedHandler = handler
+                        break
+                    }
+                }
+            }
+
+            guard let handler = resolvedHandler else {
                 log("未找到代理处理器: \(startMsg.proxyName)", level: .warn, tag: startMsg.proxyName)
                 workConn.close()
                 return

@@ -134,7 +134,7 @@ public final class ConfigManager: @unchecked Sendable {
 
     private func calculateDiffUnlocked(newConfig: FRPClientConfig) -> ConfigReloadDiff {
         let currentNames = Set(proxies.keys)
-        let newProxiesDict = Dictionary(uniqueKeysWithValues: newConfig.proxies.map { ($0.name, $0) })
+        let newProxiesDict = Dictionary(newConfig.proxies.map { ($0.name, $0) }, uniquingKeysWith: { _, last in last })
         let newNames = Set(newProxiesDict.keys)
 
         let added = Array(newNames.subtracting(currentNames)).sorted()
