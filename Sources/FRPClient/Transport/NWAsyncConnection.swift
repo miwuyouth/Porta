@@ -55,7 +55,7 @@ public final class NWAsyncConnection: AsyncConnection, @unchecked Sendable {
         timeout: TimeInterval = 10
     ) async throws -> NWAsyncConnection {
         let endpointHost = NWEndpoint.Host(host)
-        guard let endpointPort = NWEndpoint.Port(rawValue: UInt16(port)) else {
+        guard port > 0 && port <= 65535, let endpointPort = NWEndpoint.Port(rawValue: UInt16(port)) else {
             throw AsyncConnectionError.connectionFailed("Invalid port: \(port)")
         }
 

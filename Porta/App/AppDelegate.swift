@@ -17,6 +17,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
         DispatchQueue.main.async { [weak self] in
             if let window = NSApplication.shared.windows.first {
                 self?.configureWindow(window)
+                if AppState.shared.settings.hideWindowOnLaunch {
+                    window.orderOut(nil)
+                }
             }
         }
     }

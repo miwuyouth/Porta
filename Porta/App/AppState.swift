@@ -100,18 +100,27 @@ public final class AppState: ObservableObject {
         proxies.append(newProxy)
         saveData()
         processManager.notifyProxyToggled(proxy: newProxy)
+        if processManager.isRunning {
+            processManager.start(server: currentServer, proxies: currentProxies, settings: settings)
+        }
     }
 
     public func updateProxy(_ proxy: FRPProxy) {
         if let index = proxies.firstIndex(where: { $0.id == proxy.id }) {
             proxies[index] = proxy
             saveData()
+            if processManager.isRunning {
+                processManager.start(server: currentServer, proxies: currentProxies, settings: settings)
+            }
         }
     }
 
     public func deleteProxy(_ proxy: FRPProxy) {
         proxies.removeAll { $0.id == proxy.id }
         saveData()
+        if processManager.isRunning {
+            processManager.start(server: currentServer, proxies: currentProxies, settings: settings)
+        }
     }
 
     public func addServer(_ server: FRPServer) {
@@ -133,9 +142,14 @@ public final class AppState: ObservableObject {
 
     public func deleteServer(_ server: FRPServer) {
         guard servers.count > 1 else { return }
+        let wasActive = (selectedServerId == server.id)
         servers.removeAll { $0.id == server.id }
-        if selectedServerId == server.id {
+        proxies.removeAll { $0.serverId == server.id }
+        if wasActive {
             selectedServerId = servers.first?.id
+            if processManager.isRunning {
+                processManager.start(server: currentServer, proxies: currentProxies, settings: settings)
+            }
         }
         saveData()
     }

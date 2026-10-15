@@ -13,6 +13,7 @@ public final class LogManager: ObservableObject {
 
     private let logFileURL: URL
     private let maxEntries: Int = 1000
+    private let fileQueue = DispatchQueue(label: "com.porta.log.fileQueue", qos: .utility)
 
     private init() {
         self.logFileURL = StorageService.shared.logFilePath
@@ -62,7 +63,10 @@ public final class LogManager: ObservableObject {
 
     public func clear() {
         entries.removeAll()
-        try? "".write(to: logFileURL, atomically: true, encoding: .utf8)
+        fileQueue.async { [weak self] in
+            guard let self = self else { return }
+            try? "".write(to: self.logFileURL, atomically: true, encoding: .utf8)
+        }
     }
 
     public func copyAllLogsToClipboard() {
@@ -72,16 +76,18 @@ public final class LogManager: ObservableObject {
     }
 
     private func appendToFile(entry: FRPLogEntry) {
-        let line = "\(entry.timeString) [\(entry.level.rawValue)] \(entry.fullDisplayMessage)\n"
-        if let data = line.data(using: .utf8) {
-            if FileManager.default.fileExists(atPath: logFileURL.path) {
-                if let fileHandle = try? FileHandle(forWritingTo: logFileURL) {
-                    fileHandle.seekToEndOfFile()
-                    fileHandle.write(data)
+        fileQueue.async { [weak self] in
+            guard let self = self else { return }
+            let line = "\(entry.timeString) [\(entry.level.rawValue)] \(entry.fullDisplayMessage)\n"
+            guard let data = line.data(using: .utf8) else { return }
+            if FileManager.default.fileExists(atPath: self.logFileURL.path) {
+                if let fileHandle = try? FileHandle(forWritingTo: self.logFileURL) {
+                    _ = try? fileHandle.seekToEnd()
+                    try? fileHandle.write(contentsOf: data)
                     try? fileHandle.close()
                 }
             } else {
-                try? data.write(to: logFileURL)
+                try? data.write(to: self.logFileURL)
             }
         }
     }

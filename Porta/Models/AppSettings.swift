@@ -2,8 +2,8 @@ import Foundation
 
 public struct AppSettings: Codable, Equatable {
     // 通用 (General)
-    public var launchAtLogin: Bool = true
-    public var hideWindowOnLaunch: Bool = true
+    public var launchAtLogin: Bool = false
+    public var hideWindowOnLaunch: Bool = false
     public var keepRunningAfterWindowClose: Bool = true
 
     // 连接 (Connection)
