@@ -92,4 +92,13 @@ final class UtilVhostAndMetricsTests: XCTestCase {
         let str3 = LogPrefixFormatter.format(proxyName: nil, runID: nil, message: "Raw message")
         XCTAssertEqual(str3, "Raw message")
     }
+
+    func testVhostRouterLongestWildcardMatchPriority() {
+        let router = VhostRouter<String>()
+        router.addRoute(domain: "*.example.com", handler: "general_wildcard")
+        router.addRoute(domain: "*.api.example.com", handler: "specific_wildcard")
+
+        XCTAssertEqual(router.getRoute(host: "v1.api.example.com"), "specific_wildcard")
+        XCTAssertEqual(router.getRoute(host: "web.example.com"), "general_wildcard")
+    }
 }

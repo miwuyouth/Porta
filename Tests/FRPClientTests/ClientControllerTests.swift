@@ -126,4 +126,16 @@ final class ClientControllerTests: XCTestCase {
         let respOk = await controller.handle(request: reqOk)
         XCTAssertEqual(respOk.statusCode, 200)
     }
+
+    func testControllerGetProxyByNamePercentEncoded() async throws {
+        let p = FRPProxyConfig(name: "web service", localPort: 8080)
+        let manager = ConfigManager(config: FRPClientConfig(proxies: [p]))
+        let controller = FRPClientController(configManager: manager)
+
+        let req = AdminRequest(method: "GET", path: "/api/proxy/web%20service")
+        let resp = await controller.handle(request: req)
+        XCTAssertEqual(resp.statusCode, 200)
+        let proxy = try JSONDecoder().decode(FRPProxyConfig.self, from: resp.body)
+        XCTAssertEqual(proxy.name, "web service")
+    }
 }

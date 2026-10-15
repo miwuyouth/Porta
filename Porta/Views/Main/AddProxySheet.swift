@@ -120,6 +120,8 @@ public struct AddProxySheet: View {
                             TextField("例如：dev.example.com", text: $customDomains)
                                 .textFieldStyle(.roundedBorder)
                         }
+                    } else if type == .stcp || type == .xtcp {
+                        // STCP / XTCP are point-to-point, remote port is not bound on server
                     } else {
                         GridRow {
                             Text("远程端口:")
@@ -169,7 +171,7 @@ public struct AddProxySheet: View {
                 }
                 .keyboardShortcut(.defaultAction)
                 .buttonStyle(.borderedProminent)
-                .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || !isPortValid)
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
@@ -194,10 +196,20 @@ public struct AddProxySheet: View {
         }
     }
 
+    private var isPortValid: Bool {
+        guard let lp = Int(localPort), lp >= 1 && lp <= 65535 else { return false }
+        if type == .http || type == .https || type == .stcp || type == .xtcp {
+            return true
+        }
+        guard let rp = Int(remotePort), rp >= 1 && rp <= 65535 else { return false }
+        return true
+    }
+
     private func saveProxy() {
         let lPort = Int(localPort) ?? 8080
         let isHTTP = (type == .http || type == .https)
-        let rPort = isHTTP ? nil : Int(remotePort)
+        let isP2P = (type == .stcp || type == .xtcp)
+        let rPort = (isHTTP || isP2P) ? nil : Int(remotePort)
         let cDomains = isHTTP ? (customDomains.isEmpty ? nil : customDomains) : nil
         let sDomain = isHTTP ? (subdomain.isEmpty ? nil : subdomain) : nil
 
