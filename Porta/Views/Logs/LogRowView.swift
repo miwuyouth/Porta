@@ -16,39 +16,43 @@ public struct LogRowView: View {
     }
 
     public var body: some View {
-        HStack(alignment: .top, spacing: 14) {
-            // Timestamp (e.g. 11:38:39)
+        HStack(alignment: .top, spacing: 8) {
+            // Timestamp (e.g. 11:38:39) - 保持灰色
             Text(entry.timeString)
-                .font(.system(size: 12, weight: .regular, design: .monospaced))
+                .font(.system(size: 11, weight: .regular, design: .monospaced))
+                .tracking(-0.2)
                 .foregroundColor(Color(nsColor: .secondaryLabelColor))
-                .frame(width: 65, alignment: .leading)
+                .frame(width: 58, alignment: .leading)
 
-            // Level (e.g. INFO, WARN)
+            // Level (e.g. INFO, WARN) - 正常灰色，WARN 橙色，ERROR 红色
             Text(entry.level.rawValue)
-                .font(.system(size: 11, weight: isWarning || isError ? .bold : .medium, design: .monospaced))
+                .font(.system(size: 10.5, weight: isWarning || isError ? .bold : .medium, design: .monospaced))
+                .tracking(-0.2)
                 .foregroundColor(entry.level.displayColor)
-                .frame(width: 42, alignment: .leading)
+                .frame(width: 40, alignment: .leading)
 
-            // Message (supports full multiline wrap & text selection)
+            // Message - 紧凑等宽字体，深灰正文
             Text(entry.fullDisplayMessage)
-                .font(.system(size: 12.5, weight: .regular, design: .monospaced))
-                .foregroundColor(.primary)
+                .font(.system(size: 11, weight: .regular, design: .monospaced))
+                .tracking(-0.2)
+                .lineSpacing(2)
+                .foregroundColor(Color.primary.opacity(0.82))
                 .textSelection(.enabled)
                 .fixedSize(horizontal: false, vertical: true)
 
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 4)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 2.5)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             Group {
                 if isWarning {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(red: 1.0, green: 0.965, blue: 0.89))
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color.orange.opacity(0.08))
                 } else if isError {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.red.opacity(0.12))
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color.red.opacity(0.10))
                 } else {
                     Color.clear
                 }

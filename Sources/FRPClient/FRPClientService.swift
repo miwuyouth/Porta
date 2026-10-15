@@ -102,7 +102,7 @@ public actor FRPClientService {
             // 4. Start Heartbeat if needed
             startHeartbeat(on: controlConnection)
 
-            log("FRP 服务启动成功，所有代理就绪")
+            log("服务器连接成功")
             onStatusChange?(true, nil)
         } catch {
             stop()

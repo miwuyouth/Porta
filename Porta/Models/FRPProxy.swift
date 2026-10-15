@@ -67,20 +67,26 @@ public struct FRPProxy: Identifiable, Codable, Equatable, Hashable {
         self.useCompression = useCompression
     }
 
-    /// Display subtitle formatted exactly as in the mockups:
-    /// e.g. "127.0.0.1:8080 → :18080"
-    /// e.g. "127.0.0.1:22 → :10022"
+    /// Display subtitle formatted with server host:
+    /// e.g. "127.0.0.1:8080 → jp.example.com:18080"
     /// e.g. "localhost:3000 → dev.example.com"
-    public var subtitle: String {
+    public func subtitle(serverAddr: String? = nil) -> String {
         let left = "\(localIP):\(localPort)"
         if let custom = customDomains, !custom.isEmpty {
             return "\(left) → \(custom)"
         } else if let sub = subdomain, !sub.isEmpty {
             return "\(left) → \(sub)"
         } else if let remote = remotePort {
+            if let host = serverAddr, !host.isEmpty {
+                return "\(left) → \(host):\(remote)"
+            }
             return "\(left) → :\(remote)"
         } else {
             return "\(left)"
         }
+    }
+
+    public var subtitle: String {
+        subtitle(serverAddr: nil)
     }
 }

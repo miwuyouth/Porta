@@ -77,7 +77,7 @@ public struct WindowHeaderView: View {
             }
             .padding(.trailing, 18)
         }
-        .frame(height: 44)
+        .frame(height: 38)
         .background(Color(nsColor: .windowBackgroundColor))
     }
 }
