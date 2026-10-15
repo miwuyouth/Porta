@@ -91,7 +91,8 @@ public struct ServerHeaderRow: View {
                 .help("点击查看连接日志")
             }
             .padding(.horizontal, 28)
-            .padding(.vertical, 14)
+            .padding(.top, 4)
+            .padding(.bottom, 10)
 
             Divider()
                 .padding(.horizontal, 28)

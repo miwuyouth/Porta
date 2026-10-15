@@ -13,13 +13,13 @@ public enum FRPLogLevel: String, Codable, CaseIterable, Identifiable {
     public var displayColor: Color {
         switch self {
         case .all:
-            return .primary
+            return Color(nsColor: .secondaryLabelColor)
         case .debug:
-            return .secondary
+            return Color(nsColor: .secondaryLabelColor)
         case .info:
             return Color(nsColor: .secondaryLabelColor)
         case .warn:
-            return Color(red: 0.90, green: 0.55, blue: 0.10) // Amber / Orange
+            return Color.orange
         case .error:
             return Color.red
         }
