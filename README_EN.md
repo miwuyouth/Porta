@@ -5,11 +5,11 @@
 <h1 align="center">Porta</h1>
 
 <p align="center">
-  <strong>High-performance, elegant macOS FRP client desktop application built with pure Swift 6 and Apple native stack</strong>
+  <strong>A native macOS FRP client application built with Swift 6 and Apple Network.framework</strong>
 </p>
 
 <p align="center">
-  A native macOS desktop client for FRP (Fast Reverse Proxy), crafted in 100% pure Swift 6 with modern concurrency and Apple <code>Network.framework</code>.
+  A native macOS desktop client for FRP (Fast Reverse Proxy), implemented in Swift 6 with modern concurrency and Apple <code>Network.framework</code>.
 </p>
 
 <p align="center">
@@ -18,8 +18,7 @@
   <a href="https://github.com/fatedier/frp"><img src="https://img.shields.io/badge/Protocol-FRP%20v0.50%2B-5856D6.svg?style=flat-square" alt="Protocol" /></a>
   <img src="https://img.shields.io/badge/Tests-246%20Passed-34C759.svg?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/Concurrency-Data--race%20Free-blue.svg?style=flat-square" alt="Concurrency" />
-  <img src="https://img.shields.io/badge/Memory-＜15MB-brightgreen.svg?style=flat-square" alt="Memory" />
-  <img src="https://img.shields.io/badge/Dependencies-Zero%20External-orange.svg?style=flat-square" alt="Zero Dependencies" />
+  <img src="https://img.shields.io/badge/Dependencies-0%20External-orange.svg?style=flat-square" alt="Zero Dependencies" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-gray.svg?style=flat-square" alt="License" /></a>
 </p>
 
@@ -39,75 +38,73 @@
 
 ## Introduction
 
-**Porta** is a high-performance, lightweight FRP (Fast Reverse Proxy) client desktop application designed natively for macOS, built in pure Swift 6 and fully aligned with the official [fatedier/frp](https://github.com/fatedier/frp) server communication protocol.
+**Porta** is an FRP (Fast Reverse Proxy) client desktop application developed for macOS, built with Swift 6 and Apple native frameworks, compatible with the official [fatedier/frp](https://github.com/fatedier/frp) server communication protocol.
 
-Traditional solutions typically rely on running the Go-based official client inside the terminal or utilizing bloated Electron-wrapped web apps, which often carry high memory overhead, lack macOS low-power sleep coordination, and offer no native desktop interface.
-
-Porta deeply integrates into the macOS ecosystem, combining native performance with a polished GUI experience:
-- **Pure Native Stack**: Built directly on Apple's native `Network.framework` and `CryptoKit`, requiring no Go runtime or third-party dynamic libraries, idling at under 15MB RAM;
-- **Swift 6 Strict Concurrency**: Full `Actor` state isolation and structured concurrency ensuring a zero-data-race guarantee;
-- **In-house Yamux Multiplexing**: An industrial-grade pure Swift Yamux protocol engine multiplexing streams across a single long-lived connection;
-- **Refined macOS Experience**: A SwiftUI application tailored for macOS Sonoma and Sequoia, offering persistent menu bar access, instant multi-server switching, smart port conflict diagnosis, and microsecond live logs.
+Compared to running command-line binaries in a terminal or using Electron-based wrappers, Porta provides a native macOS interface and system-level integrations:
+- **Native Network and Cryptography Stack**: Uses Apple native `Network.framework` and `CryptoKit`, without requiring the Go runtime or third-party dynamic libraries.
+- **Swift 6 Concurrency Model**: State isolation managed via Actors combined with structured concurrency (`async`/`await`) to eliminate data races.
+- **Yamux Multiplexing**: Includes an in-house pure Swift Yamux implementation supporting multiple streams over a single TCP/TLS physical connection.
+- **Desktop Integration**: Provides menu bar residency, server configuration switching, port collision alerts, and a log inspection panel.
 
 ---
 
 ## Features
 
-- **Apple Native Architecture & Ultra-low Energy Consumption**  
-  Built on system-level `Network.framework` and `CryptoKit` with zero external dependencies. Coordinated with macOS power management and sleep wake-up cycles, maintaining a resident footprint under 15MB.
+- **Native Network Stack**  
+  Uses system `Network.framework` and `CryptoKit` with zero external library dependencies, responding to system power events and network changes.
 
-- **Swift 6 Modern Concurrency Safety**  
-  The core state machine is isolated within an `Actor` with strict `Sendable` validation. Guarantees compile-time thread safety under high-throughput traffic and dynamic reconnection events.
+- **Concurrency Safety**  
+  The core state machine is implemented with Swift 6 `Actor` isolation and `Sendable` validation, guaranteeing compile-time data-race safety.
 
-- **Pure Swift Yamux Multiplexing Protocol**  
-  Independent implementation of standard Yamux flow control (window updates, dynamic stream ID allocation, Ping, and GoAway). Eliminates repeated connection handshakes over a single TCP/TLS socket.
+- **Yamux Multiplexing**  
+  Implements standard Yamux flow control (stream allocation, window updates, Ping, and GoAway) to multiplex concurrent virtual streams over a single physical TCP/TLS link.
 
-- **Menu Bar Resident & Fast Access**  
-  Built with SwiftUI matching the macOS design language. Supports persistent menu bar status, global keyboard shortcuts, instant server switching, and visual connectivity indicators.
+- **Menu Bar Residency & Shortcuts**  
+  Built with SwiftUI, supporting system status bar residency, keyboard shortcuts (`⌘N` to add proxy, `⌥⌘M` for server manager, `⌘L` for logs), and connection state indicators.
 
-- **Smart Port Conflict Diagnostics & Quick Resolution**  
-  When an incoming port is occupied or rejected by the server, Porta presents an actionable banner detailing the collision and providing a 1-click edit prompt.
+- **Port Conflict Detection**  
+  Automatically reports error details when a proxy registration encounters port occupation or remote server conflicts.
 
-- **Microsecond Real-time Log Inspector**  
-  Built-in log console supporting filtration across `DEBUG`, `INFO`, `WARN`, and `ERROR` levels, instant search, and one-click log clearing for effortless diagnostics.
+- **Log Inspector**  
+  Built-in log viewer supporting level-based filtering (`DEBUG`, `INFO`, `WARN`, `ERROR`) and keyword search.
 
-- **Comprehensive Protocol Support & Encryption**  
-  Compatible with FRP v0.50.0 ~ v0.71.0+ servers. Supports TCP, UDP, HTTP/HTTPS virtual hosts (domains, subdomains, path routing, basic auth, and host rewrites), and STCP private tunnels with AES-CFB 128-bit encryption.
+- **Protocol Support**  
+  Compatible with official FRP v0.50.0 ~ v0.71.0+ server protocols. Supports TCP, UDP, HTTP/HTTPS (custom domains, subdomains, routing paths, basic auth, and host rewrites), and STCP encrypted proxies using AES-CFB.
 
 ---
 
 ## Comparison
 
-| Dimension | Official frpc (Go) | Electron / Web Wrappers | **Porta (This Project)** |
+| Dimension | Official frpc (Go) | Electron-based Client | **Porta (This Project)** |
 | :--- | :---: | :---: | :---: |
-| **Implementation** | Go Runtime + BSD Socket | Chromium + Node.js + Go Bin | **Pure Swift 6 + Network.framework** |
-| **Resident Memory** | ~40 MB - 80 MB | ~250 MB - 600 MB | **< 15 MB (Ultra lightweight)** |
-| **Cold Startup Time** | ~150 ms | ~2500 ms+ | **< 30 ms (Instantaneous)** |
-| **Runtime Dependencies** | Embedded Go runtime & GC threads | Full browser engine bundled | **Zero external dependencies (System link)** |
-| **UI & Desktop UX** | CLI only, no graphical interface | Web view, no native menu bar feel | **Native SwiftUI + Menu Bar Resident** |
-| **Port Conflict Handling** | English logs in console only | Generic error messages | **Auto-diagnosed banner with quick fix** |
-| **Server Management** | Manually editing config files | Cumbersome interface | **Visual presets & 1-click hot switching** |
-| **Energy Optimization** | Incompatible with system sleep APIs | High CPU & battery drain | **Native macOS power management & sleep wake** |
+| **Implementation** | Go Runtime + BSD Socket | Chromium + Node.js + Go Bin | **Swift 6 + Network.framework** |
+| **Typical Memory** | ~40 to 80 MB | ~250 to 600 MB | **~10 to 15 MB** |
+| **Cold Startup Time** | ~150 ms | > 2000 ms | **< 30 ms** |
+| **Third-party Runtime** | Requires Go Runtime and GC | Bundles full browser engine | **System dynamic libraries only** |
+| **Graphical Interface** | None (terminal only) | Web interface | **Native SwiftUI + Menu Bar** |
+| **Port Conflict Feedback** | Console text output | Generic error dialogue | **Banner identifying the conflicting port** |
+| **Server Switching** | Manual file modification | Depends on implementation | **Preset switching in GUI** |
+| **Power Management** | Does not coordinate with system sleep | Relies on Chromium scheduler | **Native system power and sleep wake handling** |
 
 ---
 
 ## Installation
 
-Download the latest release from [GitHub Releases](https://github.com/miwuyouth/Porta/releases):
+Download the latest release package from [GitHub Releases](https://github.com/miwuyouth/Porta/releases):
 - **`Porta-{version}.dmg`**: Open and drag `Porta.app` into your `Applications` folder;
 - **`Porta-{version}-{sha}.zip`**: Extract and run.
 
-> Requirements: macOS 14.0 (Sonoma) or newer. Universal binary natively supporting both Apple Silicon (M1–M4) and Intel Macs.
+> Requirements: macOS 14.0 (Sonoma) or newer. Universal binary natively supporting Apple Silicon (M1–M4) and Intel Macs.
 
 ---
 
 ## Quick Start
 
-1. **Launch**: Start Porta and click the menu bar status icon to open the main control panel.
-2. **Configure Server**: Press `⌥⌘M` or click the gear icon to manage servers. Enter your server address, port, and auth token. Preset multiple server nodes as needed.
-3. **Add Proxies**: Press `⌘N` to create proxy rules, selecting the proxy type (TCP, HTTP, UDP, STCP) along with local port and remote port/domain.
-4. **Connect**: Click the toggle to connect. If a remote port conflict occurs, an alert banner immediately shows the cause and resolution.
-5. **Inspect Logs**: Press `⌘L` to open the real-time log inspector with level filters and keyword search.
+1. **Launch**: Open Porta and click the menu bar status icon to view the main window.
+2. **Configure Server**: Press `⌥⌘M` or click the gear icon to open server management, entering the FRP server address, port, and authentication token.
+3. **Add Proxy**: Press `⌘N` to create a proxy rule, choose the type (TCP, HTTP, UDP, STCP), and specify local/remote ports or domains.
+4. **Connect & Status**: Click the toggle to connect. If a remote port conflict occurs, error details appear at the top of the interface.
+5. **View Logs**: Press `⌘L` to open the log window for level-based filtering and search.
 
 ---
 
@@ -121,21 +118,21 @@ Porta's configuration format is fully compatible with official FRP. For detailed
 
 | Category | Feature | Status | Details |
 | :--- | :--- | :---: | :--- |
-| **Control Signaling** | Login / LoginResp | Supported | Aligned with v0.50 ~ v0.71+, RunID session tracking |
-| | NewProxy / NewProxyResp | Supported | Proxy registration workflow & remote port allocation |
-| | ReqWorkConn / StartWorkConn | Supported | Dispatches incoming work connections to local ports |
-| | Ping / Pong Heartbeats | Supported | Autonomous heartbeat probing with auto-reconnect |
-| **Transport** | Yamux Multiplexing (`tcpMux = true`) | Supported | Pure Swift in-house implementation with flow control |
-| | TCP Direct Mode (`tcpMux = false`) | Supported | Traditional mode with per-connection physical TCP |
+| **Control Signaling** | Login / LoginResp | Supported | Aligned with v0.50 ~ v0.71+ protocol specs, RunID session binding |
+| | NewProxy / NewProxyResp | Supported | Proxy registration flow & remote port allocation handling |
+| | ReqWorkConn / StartWorkConn | Supported | Dispatches incoming work connections to target proxies |
+| | Ping / Pong Heartbeats | Supported | Periodic heartbeat probing with auto-reconnection |
+| **Transport** | Yamux Multiplexing (`tcpMux = true`) | Supported | Pure Swift implementation with flow control and stream multiplexing |
+| | TCP Direct Mode (`tcpMux = false`) | Supported | Establishes independent physical TCP connections per worker |
 | | TLS Transport Encryption | Supported | Built on Apple `Network.framework` native TLS with SNI |
-| **Proxy Types** | TCP Proxy | Supported | High-speed bidirectional stream bridging |
-| | UDP Proxy | Supported | Full packet slicing, fragmentation, and dispatch |
-| | HTTP Proxy | Supported | Supports `customDomains`, `subdomain`, `locations`, `hostHeaderRewrite` |
-| | HTTPS Proxy | Supported | Official HTTPS tunneling support |
-| | STCP Private Tunnels | Supported | Protected by AES-CFB 128-bit stream symmetric cipher |
-| **Reliability & UX** | Port Conflict Diagnostics | Supported | Detects port collision errors with instant actionable UI feedback |
-| | Graceful Shutdown | Supported | Clean signal handling with socket teardown |
-| | Multi-server Hot Switching | Supported | Switch between server presets in the GUI |
+| **Proxy Types** | TCP Proxy | Supported | Bidirectional stream bridging |
+| | UDP Proxy | Supported | Full packet slicing and encapsulation handling |
+| | HTTP Proxy | Supported | Supports `customDomains`, `subdomain`, `locations`, and host rewrites |
+| | HTTPS Proxy | Supported | HTTPS reverse proxy tunneling support |
+| | STCP Private Tunnels | Supported | Encrypted using AES-CFB 128-bit symmetric cipher |
+| **Reliability & UX** | Port Conflict Diagnostics | Supported | Detects conflicting ports and displays actionable UI feedback |
+| | Graceful Shutdown | Supported | Catches system termination signals and tears down virtual links |
+| | Multi-server Hot Switching | Supported | Switch between server presets directly in GUI |
 | | Automated Tests | Supported | 246 unit and integration test cases |
 
 ---
@@ -149,14 +146,14 @@ Porta/
 ├── logo.png                    # Project logo
 ├── frpc.toml                   # Sample configuration
 ├── scripts/
-│   └── package.sh              # Packaging script (DMG & ZIP)
-├── Porta/                      # macOS SwiftUI app source code
-│   ├── App/                    # App lifecycle & AppDelegate
-│   ├── Views/                  # Main window, settings, proxy sheets, live logs
-│   ├── Services/               # Process manager, log service, config generator
-│   └── Assets.xcassets/        # AppIcon & visual assets
+│   └── package.sh              # Build and packaging script (DMG & ZIP)
+├── Porta/                      # macOS SwiftUI application source code
+│   ├── App/                    # Application lifecycle & AppDelegate
+│   ├── Views/                  # UI views (main window, settings, live logs)
+│   ├── Services/               # Process and log management, config generation
+│   └── Assets.xcassets/        # Native icons and colors
 ├── Sources/
-│   └── FRPClient/              # Core Swift package (FRP protocol & network engine)
+│   └── FRPClient/              # FRP protocol and network engine in Swift
 └── Tests/
     └── FRPClientTests/         # 246+ unit and integration test suite
 ```
@@ -165,13 +162,13 @@ Porta/
 
 ## Roadmap
 
-- [x] Pure Swift 6 protocol alignment and actor-isolated state machine
-- [x] In-house Yamux multiplexer engine
+- [x] Pure Swift 6 protocol alignment and actor state machine
+- [x] Pure Swift Yamux multiplexing engine
 - [x] Porta macOS menu bar & desktop app (SwiftUI)
-- [x] Port conflict diagnostics and real-time log inspector
+- [x] Port conflict detection and real-time log inspector
 - [x] 246 automated test cases passing
-- [ ] XTCP P2P direct hole punching (pure Swift NAT traversal)
-- [ ] QUIC / KCP transport acceleration
+- [ ] XTCP P2P direct NAT traversal
+- [ ] QUIC / KCP transport mode extension
 - [ ] Homebrew Cask formula (`brew install --cask porta`)
 
 ---
