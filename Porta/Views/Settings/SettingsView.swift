@@ -33,13 +33,6 @@ public struct SettingsView: View {
                             Divider().padding(.horizontal, 28)
 
                             settingsToggleRow(
-                                title: "启动后隐藏窗口",
-                                isOn: $appState.settings.hideWindowOnLaunch
-                            )
-
-                            Divider().padding(.horizontal, 28)
-
-                            settingsToggleRow(
                                 title: "关闭窗口后保持运行",
                                 isOn: $appState.settings.keepRunningAfterWindowClose
                             )

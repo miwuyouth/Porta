@@ -3,7 +3,6 @@ import Foundation
 public struct AppSettings: Codable, Equatable {
     // 通用 (General)
     public var launchAtLogin: Bool = false
-    public var hideWindowOnLaunch: Bool = false
     public var keepRunningAfterWindowClose: Bool = true
 
     // 连接 (Connection)
@@ -32,7 +31,6 @@ public struct AppSettings: Codable, Equatable {
 
     enum CodingKeys: CodingKey {
         case launchAtLogin
-        case hideWindowOnLaunch
         case keepRunningAfterWindowClose
         case autoConnectOnLaunch
         case autoReconnect
@@ -46,7 +44,6 @@ public struct AppSettings: Codable, Equatable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.launchAtLogin = try container.decodeIfPresent(Bool.self, forKey: .launchAtLogin) ?? false
-        self.hideWindowOnLaunch = try container.decodeIfPresent(Bool.self, forKey: .hideWindowOnLaunch) ?? false
         self.keepRunningAfterWindowClose = try container.decodeIfPresent(Bool.self, forKey: .keepRunningAfterWindowClose) ?? true
         self.autoConnectOnLaunch = try container.decodeIfPresent(Bool.self, forKey: .autoConnectOnLaunch) ?? true
         self.autoReconnect = try container.decodeIfPresent(Bool.self, forKey: .autoReconnect) ?? true
