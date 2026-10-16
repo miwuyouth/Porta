@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 # ==========================================================
 # Porta macOS 应用打包脚本
@@ -48,34 +48,54 @@ fi
 echo "⚙️  生成 Xcode 项目..."
 xcodegen generate
 
-# 4. 编译 Release
+# 4. 编译 Release (Universal 2: arm64 + x86_64)
 BUILD_DIR="$ROOT_DIR/build"
 DIST_DIR="$ROOT_DIR/dist"
 rm -rf "$BUILD_DIR" "$DIST_DIR"
 mkdir -p "$DIST_DIR"
 
-echo "🔨 正在编译 Release 应用..."
-xcodebuild clean build \
-    -project Porta.xcodeproj \
-    -scheme Porta \
-    -configuration Release \
-    -derivedDataPath "$BUILD_DIR" \
-    MARKETING_VERSION="$VERSION" \
-    CURRENT_PROJECT_VERSION="$COMMIT_ID" \
-    CODE_SIGN_IDENTITY="" \
-    CODE_SIGNING_REQUIRED=NO \
-    CODE_SIGNING_ALLOWED=NO \
-    | xcbeautify 2>/dev/null || true
+echo "🔨 正在编译 Release 应用 (Universal 2: arm64 + x86_64)..."
+if command -v xcbeautify &> /dev/null; then
+    xcodebuild clean build \
+        -project Porta.xcodeproj \
+        -scheme Porta \
+        -configuration Release \
+        -derivedDataPath "$BUILD_DIR" \
+        ARCHS="arm64 x86_64" \
+        ONLY_ACTIVE_ARCH=NO \
+        MARKETING_VERSION="$VERSION" \
+        CURRENT_PROJECT_VERSION="$COMMIT_ID" \
+        CODE_SIGN_IDENTITY="" \
+        CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGNING_ALLOWED=NO \
+        | xcbeautify
+else
+    xcodebuild clean build \
+        -project Porta.xcodeproj \
+        -scheme Porta \
+        -configuration Release \
+        -derivedDataPath "$BUILD_DIR" \
+        ARCHS="arm64 x86_64" \
+        ONLY_ACTIVE_ARCH=NO \
+        MARKETING_VERSION="$VERSION" \
+        CURRENT_PROJECT_VERSION="$COMMIT_ID" \
+        CODE_SIGN_IDENTITY="" \
+        CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGNING_ALLOWED=NO
+fi
 
 APP_PATH="$BUILD_DIR/Build/Products/Release/Porta.app"
+BIN_PATH="$APP_PATH/Contents/MacOS/Porta"
 
-if [ ! -d "$APP_PATH" ]; then
-    # 如果上面 pipe 到 xcbeautify 吞了错误，重新用普通方式确认
-    if [ ! -d "$BUILD_DIR/Build/Products/Release/Porta.app" ]; then
-        echo "❌ 编译产物不存在，请检查编译日志。"
-        exit 1
-    fi
+if [ ! -d "$APP_PATH" ] || [ ! -f "$BIN_PATH" ]; then
+    echo "❌ 编译产物不存在或缺失主可执行文件: $BIN_PATH"
+    exit 1
 fi
+
+echo "🔏 正在执行 Ad-hoc 代码签名..."
+codesign --force --deep --sign - "$APP_PATH"
+codesign -v "$APP_PATH"
+echo "✅ 代码签名验证通过"
 
 # 5. 校验 Info.plist 中的版本信息
 INFOPLIST="$APP_PATH/Contents/Info.plist"

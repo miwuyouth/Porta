@@ -49,10 +49,10 @@ public struct LogRowView: View {
             Group {
                 if isWarning {
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.orange.opacity(0.08))
+                        .fill(Color(red: 1.0, green: 0.58, blue: 0.0, opacity: 0.08))
                 } else if isError {
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.red.opacity(0.10))
+                        .fill(Color(red: 1.0, green: 0.23, blue: 0.19, opacity: 0.10))
                 } else {
                     Color.clear
                 }
