@@ -56,6 +56,19 @@ public final class AppState: ObservableObject {
         proxies.filter { $0.serverId == nil || $0.serverId == currentServer.id }
     }
 
+    public func connectCurrentServer() {
+        processManager.start(
+            server: currentServer,
+            proxies: currentProxies,
+            settings: settings
+        )
+    }
+
+    public func autoConnectIfNeeded() {
+        guard settings.autoConnectOnLaunch else { return }
+        connectCurrentServer()
+    }
+
     public func loadData() {
         let saved = StorageService.shared.loadData()
         self.servers = saved.servers
