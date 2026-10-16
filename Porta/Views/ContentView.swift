@@ -19,12 +19,17 @@ public struct ContentView: View {
                     .transition(.opacity)
             }
         }
+        .background(
+            WindowAccessor { window in
+                AppDelegate.shared?.configureWindow(window)
+            }
+        )
         .frame(
-            minWidth: 540,
+            minWidth: 500,
             idealWidth: 540,
             maxWidth: .infinity,
-            minHeight: 380,
-            idealHeight: 380,
+            minHeight: 360,
+            idealHeight: 410,
             maxHeight: .infinity
         )
         .sheet(item: $appState.activeSheet) { sheet in

@@ -13,6 +13,7 @@
 		0F2D7623846EDD46EB2FEEA0 /* WindowHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CCFC14539BFD482C0EFCF2 /* WindowHeaderView.swift */; };
 		103BC96F131795D5E667CF28 /* FRPProcessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EB40BA4B0E92DC9EE48129 /* FRPProcessManager.swift */; };
 		1AA9B32591E715C1233E1A19 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E23A2EECC9914989B8761188 /* LogManager.swift */; };
+		1CA1F8D1C7661CCFEE116A60 /* WindowAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A385710D08A4D7C20AA2292B /* WindowAccessor.swift */; };
 		2097AF1890CA6577F839A03A /* VhostAndMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DCD37679AFB92D6B7F1533 /* VhostAndMetrics.swift */; };
 		3134330BC59369BFBA741ACA /* YamuxSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1439AFACFF40ED09F3F31B5E /* YamuxSession.swift */; };
 		357C5015E36D7FEB51DC1304 /* FRPClientService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A578970A558CB792A8E291 /* FRPClientService.swift */; };
@@ -93,6 +94,7 @@
 		8CF9B7DEA4DE6E933E5DFAB8 /* AsyncConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncConnection.swift; sourceTree = "<group>"; };
 		91E94D90C7E2E8CFF74BC2FE /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9613F7143D181501480ADDCA /* FRPLogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRPLogEntry.swift; sourceTree = "<group>"; };
+		A385710D08A4D7C20AA2292B /* WindowAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowAccessor.swift; sourceTree = "<group>"; };
 		A3D109DC109C8F6BE786CCD0 /* ConfigTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigTypes.swift; sourceTree = "<group>"; };
 		A606DEB3D4A2435193C7ECF9 /* ProxyRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyRowView.swift; sourceTree = "<group>"; };
 		A9DCD37679AFB92D6B7F1533 /* VhostAndMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VhostAndMetrics.swift; sourceTree = "<group>"; };
@@ -273,6 +275,7 @@
 			children = (
 				F3DD3A3F4189446C8BA3D349 /* StatusIndicatorDot.swift */,
 				BD64154B4CF9FFF59F9B219C /* StepperField.swift */,
+				A385710D08A4D7C20AA2292B /* WindowAccessor.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -453,6 +456,7 @@
 				0546697E6AE8439ADE7CCE7F /* StreamBridge.swift in Sources */,
 				862944070769896D36CA57E2 /* UDPPacketCodec.swift in Sources */,
 				2097AF1890CA6577F839A03A /* VhostAndMetrics.swift in Sources */,
+				1CA1F8D1C7661CCFEE116A60 /* WindowAccessor.swift in Sources */,
 				0F2D7623846EDD46EB2FEEA0 /* WindowHeaderView.swift in Sources */,
 				97B9A22E9FF329E83F0505C2 /* YamuxFrame.swift in Sources */,
 				3134330BC59369BFBA741ACA /* YamuxSession.swift in Sources */,

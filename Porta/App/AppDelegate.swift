@@ -3,8 +3,14 @@ import SwiftUI
 import UserNotifications
 
 public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+    public static weak var shared: AppDelegate?
     private var statusItem: NSStatusItem?
     private var mainWindow: NSWindow?
+
+    public override init() {
+        super.init()
+        Self.shared = self
+    }
 
     public func applicationDidFinishLaunching(_ notification: Notification) {
         setupAboutPanelSwizzling()
@@ -16,7 +22,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
             NSApplication.shared.applicationIconImage = icon
         }
 
-        // Find and configure main window
+        // Find and configure main window as fallback
         DispatchQueue.main.async { [weak self] in
             if let window = NSApplication.shared.windows.first {
                 self?.configureWindow(window)
@@ -36,10 +42,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
         window.titlebarAppearsTransparent = true
         window.styleMask.insert([.fullSizeContentView, .resizable])
         window.isMovableByWindowBackground = true
+        window.backgroundColor = .windowBackgroundColor
 
         // Window sizing
         window.minSize = NSSize(width: 500, height: 360)
-        window.setContentSize(NSSize(width: 540, height: 380))
+        window.setContentSize(NSSize(width: 540, height: 410))
         window.center()
     }
 
