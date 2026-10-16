@@ -1,5 +1,6 @@
 import Cocoa
 import SwiftUI
+import UserNotifications
 
 public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var statusItem: NSStatusItem?
@@ -8,6 +9,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
     public func applicationDidFinishLaunching(_ notification: Notification) {
         setupAboutPanelSwizzling()
         setupStatusItem()
+
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
 
         if let icon = Self.resolveAppIcon() {
             NSApplication.shared.applicationIconImage = icon
@@ -93,7 +96,12 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
         let appState = AppState.shared
 
         // Status header
-        let statusTitle = "Porta - \(appState.currentServer.name) (\(appState.processManager.status.displayText))"
+        let failedCount = appState.processManager.failedProxiesCount
+        var statusSuffix = appState.processManager.status.displayText
+        if appState.processManager.status == .connected && failedCount > 0 {
+            statusSuffix = "已连接 (\(failedCount)个代理异常)"
+        }
+        let statusTitle = "Porta - \(appState.currentServer.name) (\(statusSuffix))"
         let statusItemMenu = NSMenuItem(title: statusTitle, action: nil, keyEquivalent: "")
         statusItemMenu.isEnabled = false
         menu.addItem(statusItemMenu)
@@ -101,8 +109,13 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
 
         // Proxies quick list
         for proxy in appState.currentProxies {
+            let pStatus = appState.processManager.status(for: proxy)
+            var title = "\(proxy.name) (\(proxy.subtitle))"
+            if case .failed(let err) = pStatus {
+                title = "⚠️ \(proxy.name) (注册失败: \(FRPProxyRuntimeStatus.friendlyErrorMessage(err)))"
+            }
             let item = NSMenuItem(
-                title: "\(proxy.name) (\(proxy.subtitle))",
+                title: title,
                 action: #selector(toggleProxyFromMenu(_:)),
                 keyEquivalent: ""
             )

@@ -10,21 +10,82 @@ public struct ProxyRowView: View {
         self.proxy = proxy
     }
 
+    private var runtimeStatus: FRPProxyRuntimeStatus {
+        appState.processManager.status(for: proxy)
+    }
+
     public var body: some View {
         HStack(alignment: .center, spacing: 14) {
             // Icon
-            proxyIcon(for: proxy.iconSymbol)
-                .frame(width: 32, height: 32)
+            ZStack(alignment: .bottomTrailing) {
+                proxyIcon(for: proxy.iconSymbol)
+                    .frame(width: 32, height: 32)
+
+                if runtimeStatus.isFailed {
+                    Image(systemName: "exclamationmark.circle.fill")
+                        .font(.system(size: 11))
+                        .foregroundColor(.red)
+                        .background(Circle().fill(Color(nsColor: .windowBackgroundColor)))
+                        .offset(x: 2, y: 2)
+                }
+            }
 
             // Text stack
             VStack(alignment: .leading, spacing: 3) {
-                Text(proxy.name)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.primary)
+                HStack(alignment: .center, spacing: 6) {
+                    Text(proxy.name)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.primary)
+
+                    if case .failed = runtimeStatus {
+                        Text("注册失败")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 1.5)
+                            .background(
+                                Capsule().fill(Color.red)
+                            )
+                    } else if case .registering = runtimeStatus {
+                        Text("注册中...")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1.5)
+                            .background(
+                                Capsule().fill(Color(nsColor: .quaternaryLabelColor))
+                            )
+                    }
+                }
 
                 Text(proxySubtitle)
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(Color(nsColor: .secondaryLabelColor))
+
+                if case .failed(let errorMsg) = runtimeStatus {
+                    Button(action: {
+                        appState.showLogs(forProxy: proxy.name)
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .font(.system(size: 11))
+                                .foregroundColor(.red)
+
+                            Text(FRPProxyRuntimeStatus.friendlyErrorMessage(errorMsg))
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.red)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 9, weight: .semibold))
+                                .foregroundColor(.red.opacity(0.7))
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 1)
+                    .help("点击查看此代理错误日志")
+                }
             }
 
             Spacer()
@@ -60,6 +121,7 @@ public struct ProxyRowView: View {
             .toggleStyle(.switch)
             .tint(Color(red: 0.0, green: 0.48, blue: 1.0))
             .labelsHidden()
+            .help(runtimeStatus.isFailed ? "当前代理注册失败：\(FRPProxyRuntimeStatus.friendlyErrorMessage(runtimeStatus.errorMessage ?? ""))" : "")
         }
         .padding(.horizontal, 28)
         .padding(.vertical, 14)
@@ -87,6 +149,10 @@ public struct ProxyRowView: View {
 
     @ViewBuilder
     private var proxyActionMenuItems: some View {
+        Button("查看此代理日志") {
+            appState.showLogs(forProxy: proxy.name)
+        }
+
         Button("编辑代理...") {
             appState.activeSheet = .editProxy(proxy)
         }

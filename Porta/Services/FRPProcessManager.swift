@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import UserNotifications
 
 public enum ConnectionStatus: Equatable {
     case disconnected
@@ -22,6 +23,7 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
 
     @Published public var status: ConnectionStatus = .disconnected
     @Published public var isRunning: Bool = false
+    @Published public var proxyStatuses: [UUID: FRPProxyRuntimeStatus] = [:]
 
     // Native pure Swift FRP client
     private var clientService: FRPClientService?
@@ -33,6 +35,7 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
     private var lastSettings: AppSettings?
     private var isExplicitlyStopped: Bool = true
     private var reconnectWorkItem: DispatchWorkItem?
+    private var proxyNameToId: [String: UUID] = [:]
 
     // Optional external process override (if user specified customFrpcPath)
     private var process: Process?
@@ -53,6 +56,18 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
         lastSettings = settings
 
         stopInternal()
+
+        proxyNameToId.removeAll()
+        for p in proxies {
+            let safeName = FRPConfigGenerator.sanitizeProxyName(p.name)
+            proxyNameToId[safeName] = p.id
+            proxyNameToId[p.name] = p.id
+            if p.isEnabled {
+                proxyStatuses[p.id] = .registering
+            } else {
+                proxyStatuses[p.id] = .stopped
+            }
+        }
 
         status = .connecting
         LogManager.shared.add(level: .info, proxyTag: nil, message: "正在启动 Swift 原生 FRP 引擎...")
@@ -161,6 +176,12 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
                         self.scheduleReconnect()
                     }
                 }
+            },
+            onProxyStatusChange: { [weak self] proxyName, proxyStatus in
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    self.updateProxyStatus(proxyName: proxyName, runtimeStatus: proxyStatus)
+                }
             }
         )
 
@@ -245,6 +266,10 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
         stdoutPipe?.fileHandleForReading.readabilityHandler = nil
         stdoutPipe = nil
 
+        for (id, _) in proxyStatuses {
+            proxyStatuses[id] = .stopped
+        }
+
         isRunning = false
         status = .disconnected
     }
@@ -279,12 +304,68 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
         if proxy.isEnabled {
             LogManager.shared.add(level: .info, proxyTag: tag, message: "代理已启用")
         } else {
+            proxyStatuses[proxy.id] = .stopped
             LogManager.shared.add(level: .info, proxyTag: tag, message: "代理已停止")
         }
     }
 
     public func tagForProxyName(_ name: String) -> String {
         FRPConfigGenerator.sanitizeProxyName(name)
+    }
+
+    public func status(for proxy: FRPProxy) -> FRPProxyRuntimeStatus {
+        guard proxy.isEnabled else { return .stopped }
+        guard isRunning && status != .disconnected else { return .stopped }
+        return proxyStatuses[proxy.id] ?? .stopped
+    }
+
+    public var failedProxies: [FRPProxy] {
+        AppState.shared.currentProxies.filter { proxy in
+            proxy.isEnabled && (proxyStatuses[proxy.id]?.isFailed == true)
+        }
+    }
+
+    public var failedProxiesCount: Int {
+        failedProxies.count
+    }
+
+    public var hasProxyErrors: Bool {
+        !failedProxies.isEmpty
+    }
+
+    private func updateProxyStatus(proxyName: String, runtimeStatus: FRPProxyRuntimeStatus) {
+        let matchedId = proxyNameToId[proxyName] ?? lastProxies.first(where: {
+            tagForProxyName($0.name) == proxyName || $0.name == proxyName || $0.name.lowercased() == proxyName.lowercased()
+        })?.id ?? AppState.shared.currentProxies.first(where: {
+            tagForProxyName($0.name) == proxyName || $0.name == proxyName || $0.name.lowercased() == proxyName.lowercased()
+        })?.id
+
+        if let id = matchedId {
+            proxyStatuses[id] = runtimeStatus
+
+            if case .failed(let err) = runtimeStatus {
+                let displayName = AppState.shared.proxies.first(where: { $0.id == id })?.name ?? proxyName
+                sendErrorNotificationIfNeeded(proxyName: displayName, error: err)
+            }
+        }
+    }
+
+    private func sendErrorNotificationIfNeeded(proxyName: String, error: String) {
+        let center = UNUserNotificationCenter.current()
+        center.getNotificationSettings { settings in
+            guard settings.authorizationStatus == .authorized else { return }
+            let content = UNMutableNotificationContent()
+            content.title = "Porta 代理注册失败"
+            content.subtitle = "代理 [\(proxyName)]"
+            content.body = FRPProxyRuntimeStatus.friendlyErrorMessage(error)
+            content.sound = .default
+            let request = UNNotificationRequest(
+                identifier: "proxy_error_\(proxyName)_\(Date().timeIntervalSince1970)",
+                content: content,
+                trigger: nil
+            )
+            center.add(request)
+        }
     }
 
     private func parseRealFrpLog(_ output: String) {
@@ -342,6 +423,26 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
                 if displayMessage.contains("[\(tag)]") || displayMessage.contains("[\(proxy.name)]") {
                     proxyTag = tag
                     break
+                }
+            }
+
+            if let matchedProxy = AppState.shared.currentProxies.first(where: {
+                let tag = tagForProxyName($0.name)
+                return displayMessage.contains("[\(tag)]") || displayMessage.contains("[\($0.name)]")
+            }) {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    if displayMessage.contains("start error:") {
+                        let errMsg: String
+                        if let range = displayMessage.range(of: "start error:") {
+                            errMsg = String(displayMessage[range.upperBound...]).trimmingCharacters(in: .whitespaces)
+                        } else {
+                            errMsg = displayMessage
+                        }
+                        self.updateProxyStatus(proxyName: matchedProxy.name, runtimeStatus: .failed(error: errMsg))
+                    } else if displayMessage.contains("start proxy success") {
+                        self.updateProxyStatus(proxyName: matchedProxy.name, runtimeStatus: .running(remoteAddr: nil))
+                    }
                 }
             }
 

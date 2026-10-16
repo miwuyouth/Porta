@@ -10,7 +10,11 @@ public struct ServerHeaderRow: View {
         VStack(spacing: 0) {
             HStack(alignment: .center, spacing: 10) {
                 // Status dot indicator
-                StatusIndicatorDot(status: processManager.status, size: 8)
+                StatusIndicatorDot(
+                    status: processManager.status,
+                    hasWarning: processManager.status == .connected && processManager.hasProxyErrors,
+                    size: 8
+                )
 
                 // Server name dropdown Menu
                 Menu {
@@ -76,19 +80,31 @@ public struct ServerHeaderRow: View {
 
                 Spacer()
 
-                // Status text on right (e.g. "已连接")
+                // Status text on right (e.g. "已连接" or "已连接 (1个异常)")
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         appState.currentScreen = .logs
                     }
                 }) {
-                    Text(processManager.status.displayText)
-                        .font(.system(size: 13))
-                        .foregroundColor(Color(nsColor: .secondaryLabelColor))
+                    if processManager.status == .connected && processManager.hasProxyErrors {
+                        HStack(spacing: 4) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(Color(red: 0.95, green: 0.60, blue: 0.08))
+                            Text("已连接 (\(processManager.failedProxiesCount)个异常)")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(Color(red: 0.95, green: 0.60, blue: 0.08))
+                        }
                         .contentShape(Rectangle())
+                    } else {
+                        Text(processManager.status.displayText)
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(nsColor: .secondaryLabelColor))
+                            .contentShape(Rectangle())
+                    }
                 }
                 .buttonStyle(.plain)
-                .help("点击查看连接日志")
+                .help(processManager.hasProxyErrors ? "存在代理注册失败，点击查看日志" : "点击查看连接日志")
             }
             .padding(.horizontal, 28)
             .padding(.top, 4)

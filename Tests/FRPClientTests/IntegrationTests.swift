@@ -219,6 +219,77 @@ final class IntegrationTests: XCTestCase {
         try await serverTask.value
     }
 
+    func testProxyStatusCallbackOnPortAlreadyUsed() async throws {
+        let (clientPipe, serverPipe) = MockPipeConnection.createPair()
+        let connector = MockConnector(controlPair: (clientPipe, serverPipe))
+
+        let p1 = FRPProxyConfig(name: "6001", type: .tcp, localIP: "127.0.0.1", localPort: 6001, remotePort: 6001)
+
+        let clientConfig = FRPClientConfig(
+            serverAddr: "47.106.160.9",
+            serverPort: 7000,
+            auth: FRPAuthConfig(token: "testtoken"),
+            transport: FRPTransportConfig(heartbeatInterval: 0),
+            loginFailExit: false,
+            proxies: [p1]
+        )
+
+        let serverTask = Task {
+            _ = try await serverPipe.readMessage() as! FRPLoginMessage
+            try await serverPipe.writeMessage(FRPLoginRespMessage(version: "0.61.0", runID: "run-port-used", error: nil))
+
+            let encServer = CryptoConnection(wrapping: serverPipe, token: "testtoken")
+            _ = try await encServer.readMessage() as! FRPNewProxyMessage
+            try await encServer.writeMessage(FRPNewProxyRespMessage(proxyName: "6001", remoteAddr: nil, error: "port already used"))
+        }
+
+        final class StatusCollector: @unchecked Sendable {
+            private let lock = NSLock()
+            private(set) var events: [(String, FRPProxyRuntimeStatus)] = []
+            func add(_ name: String, _ status: FRPProxyRuntimeStatus) {
+                lock.lock()
+                defer { lock.unlock() }
+                events.append((name, status))
+            }
+            func getEvents() -> [(String, FRPProxyRuntimeStatus)] {
+                lock.lock()
+                defer { lock.unlock() }
+                return events
+            }
+        }
+
+        let collector = StatusCollector()
+
+        let client = FRPClientService(
+            config: clientConfig,
+            connector: connector,
+            onProxyStatusChange: { name, status in
+                collector.add(name, status)
+            }
+        )
+
+        try await client.start()
+
+        let eventsAfterStart = collector.getEvents()
+        let registeringEvent = eventsAfterStart.first(where: { $0.0 == "6001" && $0.1 == .registering })
+        XCTAssertNotNil(registeringEvent)
+
+        let failedEvent = eventsAfterStart.first(where: { $0.0 == "6001" && $0.1.isFailed })
+        XCTAssertNotNil(failedEvent)
+        if case .failed(let err) = failedEvent?.1 {
+            XCTAssertEqual(err, "port already used")
+            let friendly = FRPProxyRuntimeStatus.friendlyErrorMessage(err)
+            XCTAssertTrue(friendly.contains("远程端口已被占用"))
+        }
+
+        await client.stop()
+        let stoppedEvent = collector.getEvents().last
+        XCTAssertEqual(stoppedEvent?.0, "6001")
+        XCTAssertEqual(stoppedEvent?.1, .stopped)
+
+        try await serverTask.value
+    }
+
     // MARK: - 5. Full End-to-End Work Connection Data Relay
 
     func testFullEndToEndWorkConnectionDataRelay() async throws {

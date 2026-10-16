@@ -31,10 +31,70 @@ public enum FRPClientLogLevel: String, Sendable {
     case error
 }
 
+public enum FRPProxyRuntimeStatus: Equatable, Sendable {
+    case stopped
+    case registering
+    case running(remoteAddr: String?)
+    case failed(error: String)
+
+    public var isFailed: Bool {
+        if case .failed = self { return true }
+        return false
+    }
+
+    public var errorMessage: String? {
+        if case .failed(let err) = self { return err }
+        return nil
+    }
+
+    public var isRunning: Bool {
+        if case .running = self { return true }
+        return false
+    }
+
+    public var friendlyDescription: String {
+        switch self {
+        case .stopped:
+            return "已停止"
+        case .registering:
+            return "正在注册..."
+        case .running(let addr):
+            if let addr = addr, !addr.isEmpty {
+                return "已就绪 (\(addr))"
+            }
+            return "运行中"
+        case .failed(let err):
+            return FRPProxyRuntimeStatus.friendlyErrorMessage(err)
+        }
+    }
+
+    public static func friendlyErrorMessage(_ error: String) -> String {
+        let lower = error.lowercased()
+        if lower.contains("port already used") || lower.contains("port already in use") {
+            return "远程端口已被占用 (port already used)"
+        } else if lower.contains("already bound") {
+            return "远程端口已被绑定 (port already bound)"
+        } else if lower.contains("proxy already exists") {
+            return "代理名称已存在 (proxy already exists)"
+        } else if lower.contains("custom domain") && lower.contains("already used") {
+            return "自定义域名已被占用"
+        } else if lower.contains("subdomain") && lower.contains("already used") {
+            return "子域名已被占用"
+        } else if lower.contains("token authorization failed") || lower.contains("authorization failed") {
+            return "Token 认证失败"
+        } else if lower.contains("router config conflict") {
+            return "路由配置冲突"
+        } else {
+            return "注册失败: \(error)"
+        }
+    }
+}
+
 public actor FRPClientService {
     public let config: FRPClientConfig
     public var onLog: (@Sendable (FRPClientLogLevel, String?, String) -> Void)?
     public var onStatusChange: (@Sendable (Bool, String?) -> Void)?
+    public var onProxyStatusChange: (@Sendable (String, FRPProxyRuntimeStatus) -> Void)?
 
     private var connector: (any Connector)?
     private var ctlConn: (any AsyncConnection)?
@@ -55,12 +115,14 @@ public actor FRPClientService {
         connector: (any Connector)? = nil,
         proxyHandlers: [String: any ProxyHandler]? = nil,
         onLog: (@Sendable (FRPClientLogLevel, String?, String) -> Void)? = nil,
-        onStatusChange: (@Sendable (Bool, String?) -> Void)? = nil
+        onStatusChange: (@Sendable (Bool, String?) -> Void)? = nil,
+        onProxyStatusChange: (@Sendable (String, FRPProxyRuntimeStatus) -> Void)? = nil
     ) {
         self.config = config
         self.customConnector = connector
         self.onLog = onLog
         self.onStatusChange = onStatusChange
+        self.onProxyStatusChange = onProxyStatusChange
         if let handlers = proxyHandlers {
             self.proxyHandlers = handlers
         } else {
@@ -149,6 +211,10 @@ public actor FRPClientService {
 
         runID = ""
 
+        for name in proxyHandlers.keys {
+            onProxyStatusChange?(name, .stopped)
+        }
+
         log("FRP 服务已停止")
         onStatusChange?(false, nil)
     }
@@ -157,6 +223,7 @@ public actor FRPClientService {
     public func detachCallbacks() {
         self.onLog = nil
         self.onStatusChange = nil
+        self.onProxyStatusChange = nil
     }
 
     private func performLogin(on connection: any AsyncConnection) async throws {
@@ -195,26 +262,34 @@ public actor FRPClientService {
         for (name, handler) in proxyHandlers {
             let newProxyMsg = handler.makeNewProxyMessage()
             log("正在注册代理 [\(name)]，类型: \(handler.config.type)...", tag: name)
+            onProxyStatusChange?(name, .registering)
 
-            let resp: FRPNewProxyRespMessage = try await withCheckedThrowingContinuation { continuation in
-                self.pendingProxyRegistrations[name] = continuation
-                Task {
-                    do {
-                        try await connection.writeMessage(newProxyMsg)
-                    } catch {
-                        self.failPendingRegistration(name: name, error: error)
+            do {
+                let resp: FRPNewProxyRespMessage = try await withCheckedThrowingContinuation { continuation in
+                    self.pendingProxyRegistrations[name] = continuation
+                    Task {
+                        do {
+                            try await connection.writeMessage(newProxyMsg)
+                        } catch {
+                            self.failPendingRegistration(name: name, error: error)
+                        }
                     }
                 }
-            }
 
-            if let error = resp.error, !error.isEmpty {
-                log("代理 [\(name)] 注册失败: \(error)", level: .error, tag: name)
-                if config.loginFailExit {
-                    throw FRPClientError.proxyRegisterFailed(name: name, error: error)
+                if let error = resp.error, !error.isEmpty {
+                    log("代理 [\(name)] 注册失败: \(error)", level: .error, tag: name)
+                    onProxyStatusChange?(name, .failed(error: error))
+                    if config.loginFailExit {
+                        throw FRPClientError.proxyRegisterFailed(name: name, error: error)
+                    }
+                } else {
+                    let remoteAddr = resp.remoteAddr ?? "established"
+                    log("代理 [\(name)] 注册成功 -> \(remoteAddr)", level: .info, tag: name)
+                    onProxyStatusChange?(name, .running(remoteAddr: remoteAddr))
                 }
-            } else {
-                let remoteAddr = resp.remoteAddr ?? "established"
-                log("代理 [\(name)] 注册成功 -> \(remoteAddr)", level: .info, tag: name)
+            } catch {
+                onProxyStatusChange?(name, .failed(error: error.localizedDescription))
+                throw error
             }
         }
     }

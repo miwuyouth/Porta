@@ -15,6 +15,15 @@ public struct MainView: View {
             // Server Header Row (Green dot, 东京服务器 ⌵, 已连接)
             ServerHeaderRow()
 
+            // Error banner for failed proxies (e.g. port already used)
+            if let firstFailed = appState.currentProxies.first(where: {
+                $0.isEnabled &&
+                !appState.dismissedBannerProxyIds.contains($0.id) &&
+                appState.processManager.status(for: $0).isFailed
+            }), case .failed(let errMsg) = appState.processManager.status(for: firstFailed) {
+                failedProxyBanner(proxy: firstFailed, errorMsg: errMsg)
+            }
+
             // Proxy List or Empty State
             if appState.currentProxies.isEmpty {
                 emptyStateView
@@ -106,5 +115,86 @@ public struct MainView: View {
             .controlSize(.regular)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private func failedProxyBanner(proxy: FRPProxy, errorMsg: String) -> some View {
+        HStack(alignment: .center, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 14))
+                .foregroundColor(Color.red)
+
+            VStack(alignment: .leading, spacing: 1.5) {
+                Text("代理 [\(proxy.name)] 注册失败")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Color.red)
+                Text(FRPProxyRuntimeStatus.friendlyErrorMessage(errorMsg))
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(nsColor: .secondaryLabelColor))
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            Button(action: {
+                appState.activeSheet = .editProxy(proxy)
+            }) {
+                Text("修改配置")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.primary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3.5)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(Color(nsColor: .separatorColor), lineWidth: 0.5)
+                    )
+                    .cornerRadius(5)
+            }
+            .buttonStyle(.plain)
+
+            Button(action: {
+                appState.showLogs(forProxy: proxy.name)
+            }) {
+                Text("查看日志")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.primary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3.5)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(Color(nsColor: .separatorColor), lineWidth: 0.5)
+                    )
+                    .cornerRadius(5)
+            }
+            .buttonStyle(.plain)
+
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    appState.dismissedBannerProxyIds.insert(proxy.id)
+                }
+            }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(Color(nsColor: .secondaryLabelColor))
+                    .frame(width: 16, height: 16)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("忽略此提示")
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.red.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal, 28)
+        .padding(.top, 8)
     }
 }
