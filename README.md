@@ -93,30 +93,11 @@ Porta 深度融合 macOS 生态，兼备原生级性能与细腻的桌面交互�
 
 ## 下载与安装
 
-### 预编译应用
-
 前往 [GitHub Releases](https://github.com/miwuyouth/Porta/releases) 下载最新安装包：
 - **`Porta-{version}.dmg`**：打开后将 `Porta.app` 拖入 `Applications` 目录即可开始使用；
 - **`Porta-{version}-{sha}.zip`**：解压即可运行。
 
 > 运行要求：macOS 14.0 (Sonoma) 或更高版本，原生支持 Apple Silicon (M1–M4) 与 Intel 架构。
-
----
-
-### 从源码编译打包
-
-如果你希望在本地构建并打包 DMG 镜像：
-
-```bash
-# 1. 安装工程生成工具
-brew install xcodegen
-
-# 2. 一键编译并生成 DMG 与 ZIP
-chmod +x scripts/package.sh
-./scripts/package.sh 0.1.0
-```
-
-打包完成后，产物将自动生成于 `dist/` 目录下（包含 `Porta.app` 与 `Porta-0.1.0.dmg`）。
 
 ---
 
