@@ -35,7 +35,7 @@
 </p>
 
 <p align="center">
-  <img src="screenshot.png" width="580" alt="Porta Preview" />
+  <img src="preview.png" width="580" alt="Porta Preview" />
 </p>
 
 ---
