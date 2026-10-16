@@ -34,6 +34,10 @@
   <a href="README.md"><strong>简体中文</strong></a> | <a href="README_EN.md">English</a>
 </p>
 
+<p align="center">
+  <img src="screenshot.png" width="580" alt="Porta 界面预览" />
+</p>
+
 ---
 
 ## 项目简介

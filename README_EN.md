@@ -34,6 +34,10 @@
   <a href="README.md">简体中文</a> | <a href="README_EN.md"><strong>English</strong></a>
 </p>
 
+<p align="center">
+  <img src="screenshot.png" width="580" alt="Porta Preview" />
+</p>
+
 ---
 
 ## Introduction
