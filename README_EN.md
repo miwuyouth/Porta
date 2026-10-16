@@ -23,7 +23,6 @@
 </p>
 
 <p align="center">
-  <a href="#comparison">Comparison</a> •
   <a href="#installation">Installation</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#configuration">Configuration</a>
@@ -48,21 +47,6 @@ Compared to running command-line binaries in a terminal or using Electron-based 
 - **Swift 6 Concurrency Model**: State isolation managed via Actors combined with structured concurrency (`async`/`await`) to eliminate data races.
 - **Yamux Multiplexing**: Includes an in-house pure Swift Yamux implementation supporting multiple streams over a single TCP/TLS physical connection.
 - **Desktop Integration**: Provides menu bar residency, server configuration switching, port collision alerts, and a log inspection panel.
-
----
-
-## Comparison
-
-| Dimension | Official frpc (Go) | Electron-based Client | **Porta (This Project)** |
-| :--- | :---: | :---: | :---: |
-| **Implementation** | Go Runtime + BSD Socket | Chromium + Node.js + Go Bin | **Swift 6 + Network.framework** |
-| **Typical Memory** | ~40 to 80 MB | ~250 to 600 MB | **~10 to 15 MB** |
-| **Cold Startup Time** | ~150 ms | > 2000 ms | **< 30 ms** |
-| **Third-party Runtime** | Requires Go Runtime and GC | Bundles full browser engine | **System dynamic libraries only** |
-| **Graphical Interface** | None (terminal only) | Web interface | **Native SwiftUI + Menu Bar** |
-| **Port Conflict Feedback** | Console text output | Generic error dialogue | **Banner identifying the conflicting port** |
-| **Server Switching** | Manual file modification | Depends on implementation | **Preset switching in GUI** |
-| **Power Management** | Does not coordinate with system sleep | Relies on Chromium scheduler | **Native system power and sleep wake handling** |
 
 ---
 
