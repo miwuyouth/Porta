@@ -42,7 +42,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
         window.titlebarAppearsTransparent = true
         window.styleMask.insert([.fullSizeContentView, .resizable])
         window.isMovableByWindowBackground = true
-        window.backgroundColor = .windowBackgroundColor
+        window.backgroundColor = .appBackground
 
         // Window sizing
         window.minSize = NSSize(width: 500, height: 360)

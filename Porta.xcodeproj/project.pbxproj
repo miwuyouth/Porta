@@ -51,6 +51,7 @@
 		D03BC500B0D1188AC69A5C12 /* FRPFrameCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF35847D2F984C2C761A0ED /* FRPFrameCodec.swift */; };
 		D2C0F4DBCA14DEFD9F244BCB /* ConfigTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D109DC109C8F6BE786CCD0 /* ConfigTypes.swift */; };
 		D358D7A6ED720A9C938D87D8 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B510B1046A33D48318486D /* SettingsView.swift */; };
+		DACFE22C482D6A815C03CC83 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F9770C43F776CF64EF1F33 /* AppTheme.swift */; };
 		DADAB076371700EBDBDC9B9B /* ProxyRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A606DEB3D4A2435193C7ECF9 /* ProxyRowView.swift */; };
 		DE4BEFA067791C5A810F0CBD /* NWAsyncConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C630ADFD623ACFBF7E3590 /* NWAsyncConnection.swift */; };
 		F3DC9A72F5E7A47ABD6FBA1B /* FRPConfigGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F6BA7AAACCFFB8E441973DA /* FRPConfigGenerator.swift */; };
@@ -74,6 +75,7 @@
 		31B510B1046A33D48318486D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		35C630ADFD623ACFBF7E3590 /* NWAsyncConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWAsyncConnection.swift; sourceTree = "<group>"; };
 		3630EFA0A992758951ADF2BB /* Lock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lock.swift; sourceTree = "<group>"; };
+		37F9770C43F776CF64EF1F33 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		3B24DBF90E464B743555ABC7 /* ClientController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientController.swift; sourceTree = "<group>"; };
 		3CB169EE58EB745650D48CE4 /* YamuxStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YamuxStream.swift; sourceTree = "<group>"; };
 		3F4AB93078E984DA63389763 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -207,6 +209,7 @@
 		65B561C771B1EE69145EF4D3 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				37F9770C43F776CF64EF1F33 /* AppTheme.swift */,
 				5CFC3B7501657303C7CF1402 /* ContentView.swift */,
 				C2CCFC14539BFD482C0EFCF2 /* WindowHeaderView.swift */,
 				A343D36A6E1712E5B4FF6D92 /* Components */,
@@ -416,6 +419,7 @@
 				F9C462FFBDCB50D79316B2FE /* AppDelegate.swift in Sources */,
 				45D2F21BD8C240719D598335 /* AppSettings.swift in Sources */,
 				BB829737A3B11A6CC9A7D793 /* AppState.swift in Sources */,
+				DACFE22C482D6A815C03CC83 /* AppTheme.swift in Sources */,
 				0B806B1269A05ECDFF2F8670 /* AsyncConnection.swift in Sources */,
 				F3E38B7684BCEE9C033F6666 /* ClientController.swift in Sources */,
 				62C02A2FDB025D2329F3F890 /* ConfigManager.swift in Sources */,

@@ -90,6 +90,6 @@ public struct WindowHeaderView: View {
             .padding(.horizontal, 28)
         }
         .frame(height: 38)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Color.appBackground)
     }
 }

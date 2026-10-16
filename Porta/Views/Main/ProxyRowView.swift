@@ -25,7 +25,7 @@ public struct ProxyRowView: View {
                     Image(systemName: "exclamationmark.circle.fill")
                         .font(.system(size: 11))
                         .foregroundColor(.red)
-                        .background(Circle().fill(Color(nsColor: .windowBackgroundColor)))
+                        .background(Circle().fill(Color.appBackground))
                         .offset(x: 2, y: 2)
                 }
             }
