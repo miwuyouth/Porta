@@ -93,30 +93,11 @@ Porta deeply integrates into the macOS ecosystem, combining native performance w
 
 ## Installation
 
-### Pre-built Application
-
 Download the latest release from [GitHub Releases](https://github.com/miwuyouth/Porta/releases):
 - **`Porta-{version}.dmg`**: Open and drag `Porta.app` into your `Applications` folder;
 - **`Porta-{version}-{sha}.zip`**: Extract and run.
 
 > Requirements: macOS 14.0 (Sonoma) or newer. Universal binary natively supporting both Apple Silicon (M1–M4) and Intel Macs.
-
----
-
-### Building from Source
-
-To package the application and DMG locally:
-
-```bash
-# 1. Install project generator
-brew install xcodegen
-
-# 2. Package release bundle
-chmod +x scripts/package.sh
-./scripts/package.sh 0.1.0
-```
-
-The compiled `Porta.app` and `Porta-0.1.0.dmg` will be generated in the `dist/` directory.
 
 ---
 
