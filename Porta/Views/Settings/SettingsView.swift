@@ -55,6 +55,13 @@ public struct SettingsView: View {
 
                         VStack(spacing: 0) {
                             settingsToggleRow(
+                                title: "启动时自动连接",
+                                isOn: $appState.settings.autoConnectOnLaunch
+                            )
+
+                            Divider().padding(.horizontal, 28)
+
+                            settingsToggleRow(
                                 title: "断线自动重连",
                                 isOn: $appState.settings.autoReconnect
                             )

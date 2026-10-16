@@ -30,6 +30,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
                     window.orderOut(nil)
                 }
             }
+            AppState.shared.autoConnectIfNeeded()
         }
     }
 
