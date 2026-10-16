@@ -45,12 +45,6 @@ public struct ServerHeaderRow: View {
 
                     Divider()
 
-                    Button("查看实时日志") {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            appState.currentScreen = .logs
-                        }
-                    }
-
                     if processManager.isRunning {
                         Button("重新连接") {
                             processManager.start(server: appState.currentServer, proxies: appState.currentProxies, settings: appState.settings)
