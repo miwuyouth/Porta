@@ -148,7 +148,7 @@ public struct LogsView: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 6)
                 }
-                .onChange(of: logManager.entries.count) { _ in
+                .onChange(of: logManager.entries.count) {
                     if logManager.autoScroll, let last = logManager.filteredEntries.last {
                         withAnimation(.easeOut(duration: 0.15)) {
                             proxy.scrollTo(last.id, anchor: .bottom)

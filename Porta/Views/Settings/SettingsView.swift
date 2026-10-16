@@ -70,7 +70,7 @@ public struct SettingsView: View {
                             }
                             .padding(.horizontal, 28)
                             .padding(.vertical, 8)
-                            .onChange(of: appState.settings.retryIntervalSeconds) { _ in
+                            .onChange(of: appState.settings.retryIntervalSeconds) {
                                 appState.saveData()
                             }
 
@@ -85,7 +85,7 @@ public struct SettingsView: View {
                             }
                             .padding(.horizontal, 28)
                             .padding(.vertical, 8)
-                            .onChange(of: appState.settings.connectTimeoutSeconds) { _ in
+                            .onChange(of: appState.settings.connectTimeoutSeconds) {
                                 appState.saveData()
                             }
                         }
@@ -242,7 +242,7 @@ public struct SettingsView: View {
                 .toggleStyle(.switch)
                 .tint(Color(red: 0.0, green: 0.48, blue: 1.0))
                 .labelsHidden()
-                .onChange(of: isOn.wrappedValue) { newValue in
+                .onChange(of: isOn.wrappedValue) { _, newValue in
                     appState.saveData()
                     if title == "登录时启动" {
                         updateLaunchAtLogin(enabled: newValue)

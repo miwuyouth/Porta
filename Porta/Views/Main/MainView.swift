@@ -172,7 +172,7 @@ public struct MainView: View {
 
             Button(action: {
                 withAnimation(.easeInOut(duration: 0.2)) {
-                    appState.dismissedBannerProxyIds.insert(proxy.id)
+                    _ = appState.dismissedBannerProxyIds.insert(proxy.id)
                 }
             }) {
                 Image(systemName: "xmark")
