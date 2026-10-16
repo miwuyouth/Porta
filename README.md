@@ -73,6 +73,8 @@
 - **`Porta-{version}-{sha}.zip`**：解压即可运行。
 
 > 运行要求：macOS 14.0 (Sonoma) 或更高版本，原生支持 Apple Silicon (M1–M4) 与 Intel 架构。
+>
+> 若首次打开提示“无法验证开发者”或“文件损坏”，系 macOS Gatekeeper 隔离机制所致。可在终端执行 `xattr -cr /Applications/Porta.app` 解除隔离，或在“系统设置 → 隐私与安全性”中点击“仍要打开”。
 
 ---
 

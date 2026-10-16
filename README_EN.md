@@ -73,6 +73,8 @@ Download the latest release package from [GitHub Releases](https://github.com/mi
 - **`Porta-{version}-{sha}.zip`**: Extract and run.
 
 > Requirements: macOS 14.0 (Sonoma) or newer. Universal binary natively supporting Apple Silicon (M1–M4) and Intel Macs.
+>
+> If macOS displays an "unverified developer" or "damaged" prompt on first launch due to Gatekeeper quarantine, run `xattr -cr /Applications/Porta.app` in Terminal, or go to "System Settings → Privacy & Security" and click "Open Anyway".
 
 ---
 

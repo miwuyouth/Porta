@@ -188,10 +188,10 @@ public struct MainView: View {
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.red.opacity(0.08))
+                .fill(Color(red: 1.0, green: 0.23, blue: 0.19, opacity: 0.08))
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                        .stroke(Color(red: 1.0, green: 0.23, blue: 0.19, opacity: 0.3), lineWidth: 1)
                 )
         )
         .padding(.horizontal, 28)
