@@ -17,7 +17,7 @@ else
     if [ -n "$GIT_TAG" ]; then
         VERSION="${GIT_TAG#v}"
     else
-        VERSION="0.1.1-dev"
+        VERSION="0.0.0-dev"
     fi
 fi
 
