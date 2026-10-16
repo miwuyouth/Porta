@@ -30,7 +30,7 @@ public struct ServerManagerSheet: View {
             }
             .frame(height: 38)
             .frame(maxWidth: .infinity)
-            .background(Color(nsColor: .windowBackgroundColor))
+            .background(Color.appBackground)
 
             Divider()
 
@@ -264,10 +264,10 @@ public struct ServerManagerSheet: View {
                     }
                     .padding(.horizontal, 24)
                     .frame(height: 44)
-                    .background(Color(nsColor: .windowBackgroundColor))
+                    .background(Color.appBackground)
                 }
                 .frame(maxWidth: .infinity)
-                .background(Color(nsColor: .windowBackgroundColor))
+                .background(Color.appBackground)
             }
         }
         .frame(
@@ -278,7 +278,7 @@ public struct ServerManagerSheet: View {
             idealHeight: 420,
             maxHeight: 800
         )
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Color.appBackground)
         .onAppear {
             if case .addServer = appState.activeSheet {
                 startNewServer()

@@ -177,7 +177,7 @@ public struct AddProxySheet: View {
             .padding(.vertical, 12)
         }
         .frame(width: 420, height: 320)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Color.appBackground)
         .onAppear {
             if let p = editingProxy {
                 if p.iconSymbol == "chevron.left.forwardslash.chevron.right" {

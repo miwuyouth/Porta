@@ -221,9 +221,9 @@ public struct SettingsView: View {
             }
             .padding(.horizontal, 28)
             .padding(.vertical, 12)
-            .background(Color(nsColor: .windowBackgroundColor))
+            .background(Color.appBackground)
         }
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Color.appBackground)
         .alert("已是最新版本", isPresented: $showingUpdateAlert) {
             Button("好", role: .cancel) {}
         } message: {

@@ -183,8 +183,8 @@ public struct LogsView: View {
             }
             .padding(.horizontal, 28)
             .padding(.vertical, 10)
-            .background(Color(nsColor: .windowBackgroundColor))
+            .background(Color.appBackground)
         }
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Color.appBackground)
     }
 }
