@@ -23,7 +23,6 @@
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> •
   <a href="#comparison">Comparison</a> •
   <a href="#installation">Installation</a> •
   <a href="#quick-start">Quick Start</a> •
@@ -49,31 +48,6 @@ Compared to running command-line binaries in a terminal or using Electron-based 
 - **Swift 6 Concurrency Model**: State isolation managed via Actors combined with structured concurrency (`async`/`await`) to eliminate data races.
 - **Yamux Multiplexing**: Includes an in-house pure Swift Yamux implementation supporting multiple streams over a single TCP/TLS physical connection.
 - **Desktop Integration**: Provides menu bar residency, server configuration switching, port collision alerts, and a log inspection panel.
-
----
-
-## Features
-
-- **Native Network Stack**  
-  Uses system `Network.framework` and `CryptoKit` with zero external library dependencies, responding to system power events and network changes.
-
-- **Concurrency Safety**  
-  The core state machine is implemented with Swift 6 `Actor` isolation and `Sendable` validation, guaranteeing compile-time data-race safety.
-
-- **Yamux Multiplexing**  
-  Implements standard Yamux flow control (stream allocation, window updates, Ping, and GoAway) to multiplex concurrent virtual streams over a single physical TCP/TLS link.
-
-- **Menu Bar Residency & Shortcuts**  
-  Built with SwiftUI, supporting system status bar residency, keyboard shortcuts (`⌘N` to add proxy, `⌥⌘M` for server manager, `⌘L` for logs), and connection state indicators.
-
-- **Port Conflict Detection**  
-  Automatically reports error details when a proxy registration encounters port occupation or remote server conflicts.
-
-- **Log Inspector**  
-  Built-in log viewer supporting level-based filtering (`DEBUG`, `INFO`, `WARN`, `ERROR`) and keyword search.
-
-- **Protocol Support**  
-  Compatible with official FRP v0.50.0 ~ v0.71.0+ server protocols. Supports TCP, UDP, HTTP/HTTPS (custom domains, subdomains, routing paths, basic auth, and host rewrites), and STCP encrypted proxies using AES-CFB.
 
 ---
 
