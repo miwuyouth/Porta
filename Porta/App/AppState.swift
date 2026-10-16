@@ -31,6 +31,7 @@ public final class AppState: ObservableObject {
 
     @Published public var currentScreen: AppScreen = .main
     @Published public var activeSheet: ActiveSheet? = nil
+    @Published public var dismissedBannerProxyIds: Set<UUID> = []
 
     @Published public var servers: [FRPServer] = []
     @Published public var selectedServerId: UUID? = nil
@@ -72,8 +73,20 @@ public final class AppState: ObservableObject {
         )
     }
 
+    public func showLogs(forProxy proxyName: String? = nil) {
+        if let name = proxyName {
+            logManager.selectedProxyFilter = name
+        } else {
+            logManager.selectedProxyFilter = "全部代理"
+        }
+        withAnimation(.easeInOut(duration: 0.2)) {
+            currentScreen = .logs
+        }
+    }
+
     public func selectServer(_ server: FRPServer) {
         self.selectedServerId = server.id
+        self.dismissedBannerProxyIds.removeAll()
         saveData()
 
         // Reconnect with new server config if running
@@ -86,6 +99,7 @@ public final class AppState: ObservableObject {
         if let index = proxies.firstIndex(where: { $0.id == proxy.id }) {
             proxies[index].isEnabled.toggle()
             let updated = proxies[index]
+            dismissedBannerProxyIds.remove(proxy.id)
             saveData()
             processManager.notifyProxyToggled(proxy: updated)
 
@@ -110,6 +124,7 @@ public final class AppState: ObservableObject {
     public func updateProxy(_ proxy: FRPProxy) {
         if let index = proxies.firstIndex(where: { $0.id == proxy.id }) {
             proxies[index] = proxy
+            dismissedBannerProxyIds.remove(proxy.id)
             saveData()
             if processManager.isRunning {
                 processManager.start(server: currentServer, proxies: currentProxies, settings: settings)
