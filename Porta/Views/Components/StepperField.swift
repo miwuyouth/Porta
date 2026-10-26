@@ -54,12 +54,7 @@ public struct StepperField: View {
                 .frame(width: 18)
             }
             .frame(height: 24)
-            .background(Color(nsColor: .controlBackgroundColor))
-            .overlay(
-                RoundedRectangle(cornerRadius: 5)
-                    .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 5))
+            .portaGlass(in: RoundedRectangle(cornerRadius: PortaGlass.isAvailable ? 10 : 5), interactive: false)
 
             Text(unit)
                 .font(.system(size: 13))

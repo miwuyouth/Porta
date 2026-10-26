@@ -96,7 +96,7 @@ Porta's configuration format is fully compatible with official FRP. For detailed
 | | STCP Private Tunnels | Supported | Encrypted using AES-CFB 128-bit symmetric cipher |
 | **Reliability & UX** | Port Conflict Diagnostics | Supported | Detects conflicting ports and displays actionable UI feedback |
 | | Graceful Shutdown | Supported | Catches system termination signals and tears down virtual links |
-| | Multi-server Hot Switching | Supported | Switch between server presets directly in GUI |
+| | Multi-server Concurrent Connections | Supported | Each server runs its own connection and reconnect loop, all can be online at once |
 | | Automated Tests | Supported | 246 unit and integration test cases |
 
 ---

@@ -18,77 +18,121 @@ public enum ConnectionStatus: Equatable {
     }
 }
 
+/// One independent connection to a single FRP server.
+private final class ServerSession: @unchecked Sendable {
+    var server: FRPServer
+    var proxies: [FRPProxy]
+    var settings: AppSettings
+    var logPrefix: String = ""
+
+    var isExplicitlyStopped: Bool = false
+    var reconnectWorkItem: DispatchWorkItem?
+    var proxyNameToId: [String: UUID] = [:]
+
+    // Native pure Swift FRP client
+    var clientService: FRPClientService?
+    var serviceTask: Task<Void, Never>?
+
+    // Optional external process override (if user specified customFrpcPath)
+    var process: Process?
+    var stdoutPipe: Pipe?
+
+    init(server: FRPServer, proxies: [FRPProxy], settings: AppSettings) {
+        self.server = server
+        self.proxies = proxies
+        self.settings = settings
+    }
+}
+
+/// Manages one connection per server, so several servers can be online at the same time.
 public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
     public static let shared = FRPProcessManager()
 
-    @Published public var status: ConnectionStatus = .disconnected
-    @Published public var isRunning: Bool = false
+    /// Connection status per server id. A missing entry means disconnected.
+    @Published public private(set) var serverStatuses: [UUID: ConnectionStatus] = [:]
+    /// Servers the user has started and not explicitly stopped (includes ones currently retrying).
+    @Published public private(set) var activeServerIds: Set<UUID> = []
     @Published public var proxyStatuses: [UUID: FRPProxyRuntimeStatus] = [:]
 
-    // Native pure Swift FRP client
-    private var clientService: FRPClientService?
-    private var serviceTask: Task<Void, Never>?
+    private var sessions: [UUID: ServerSession] = [:]
 
-    // Auto-reconnect & state management
-    private var lastServer: FRPServer?
-    private var lastProxies: [FRPProxy] = []
-    private var lastSettings: AppSettings?
-    private var isExplicitlyStopped: Bool = true
-    private var reconnectWorkItem: DispatchWorkItem?
-    private var proxyNameToId: [String: UUID] = [:]
+    private init() {}
 
-    // Optional external process override (if user specified customFrpcPath)
-    private var process: Process?
-    private var stdoutPipe: Pipe?
+    // MARK: - Server state
 
-    private init() {
-        self.status = .disconnected
-        self.isRunning = false
+    public func status(forServer id: UUID) -> ConnectionStatus {
+        serverStatuses[id] ?? .disconnected
     }
 
+    public func isActive(serverId id: UUID) -> Bool {
+        activeServerIds.contains(id)
+    }
+
+    public var hasActiveServers: Bool {
+        !activeServerIds.isEmpty
+    }
+
+    public var connectedServerCount: Int {
+        serverStatuses.values.filter { $0 == .connected }.count
+    }
+
+    private func setStatus(_ status: ConnectionStatus, for session: ServerSession) {
+        serverStatuses[session.server.id] = status
+    }
+
+    private func log(_ session: ServerSession, _ level: FRPLogLevel, tag: String? = nil, _ message: String) {
+        LogManager.shared.add(level: level, proxyTag: tag, message: session.logPrefix + message)
+    }
+
+    // MARK: - Start / stop
+
+    /// Starts (or restarts) the connection for `server`. Other servers are left untouched.
     public func start(server: FRPServer, proxies: [FRPProxy], settings: AppSettings) {
-        reconnectWorkItem?.cancel()
-        reconnectWorkItem = nil
-        isExplicitlyStopped = false
+        let session = sessions[server.id] ?? ServerSession(server: server, proxies: proxies, settings: settings)
+        sessions[server.id] = session
 
-        lastServer = server
-        lastProxies = proxies
-        lastSettings = settings
+        session.reconnectWorkItem?.cancel()
+        session.reconnectWorkItem = nil
 
-        stopInternal()
+        stopInternal(session)
 
-        proxyNameToId.removeAll()
+        session.isExplicitlyStopped = false
+        session.server = server
+        session.proxies = proxies
+        session.settings = settings
+        session.logPrefix = AppState.shared.servers.count > 1 ? "[\(server.name)] " : ""
+        activeServerIds.insert(server.id)
+
+        session.proxyNameToId.removeAll()
         for p in proxies {
             let safeName = FRPConfigGenerator.sanitizeProxyName(p.name)
-            proxyNameToId[safeName] = p.id
-            proxyNameToId[p.name] = p.id
-            if p.isEnabled {
-                proxyStatuses[p.id] = .registering
-            } else {
-                proxyStatuses[p.id] = .stopped
-            }
+            session.proxyNameToId[safeName] = p.id
+            session.proxyNameToId[p.name] = p.id
+            proxyStatuses[p.id] = p.isEnabled ? .registering : .stopped
         }
 
-        status = .connecting
-        LogManager.shared.add(level: .info, proxyTag: nil, message: "正在启动 Swift 原生 FRP 引擎...")
+        setStatus(.connecting, for: session)
+        log(session, .info, "正在启动 Swift 原生 FRP 引擎...")
 
-        // Always generate frpc.toml for config persistence and reference
+        // Always generate a per-server frpc config for persistence and reference
         let configString = FRPConfigGenerator.generateToml(server: server, proxies: proxies, settings: settings)
-        let configURL = StorageService.shared.appDirectoryURL.appendingPathComponent("frpc.toml")
+        let configURL = StorageService.shared.appDirectoryURL.appendingPathComponent("frpc_\(server.id.uuidString).toml")
         try? configString.write(to: configURL, atomically: true, encoding: .utf8)
 
         // Check if user explicitly provided a custom frpc binary override
         if !settings.customFrpcPath.isEmpty && FileManager.default.isExecutableFile(atPath: settings.customFrpcPath) {
-            startExternalProcess(binaryPath: settings.customFrpcPath, configURL: configURL)
+            startExternalProcess(session, binaryPath: settings.customFrpcPath, configURL: configURL)
             return
         }
 
         // Native Pure Swift FRP Client Mode
-        startNativeClient(server: server, proxies: proxies, settings: settings)
+        startNativeClient(session)
     }
 
-    private func startNativeClient(server: FRPServer, proxies: [FRPProxy], settings: AppSettings) {
-        let activeProxies = proxies.filter { $0.isEnabled }
+    private func startNativeClient(_ session: ServerSession) {
+        let server = session.server
+        let settings = session.settings
+        let activeProxies = session.proxies.filter { $0.isEnabled }
 
         let proxyConfigs: [FRPProxyConfig] = activeProxies.map { proxy in
             let proxyType: FRPProxyType
@@ -149,7 +193,8 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
 
         let service = FRPClientService(
             config: clientConfig,
-            onLog: { [weak self] level, tag, message in
+            onLog: { [weak self, weak session] level, tag, message in
+                guard let session = session else { return }
                 let logLevel: FRPLogLevel
                 switch level {
                 case .debug: logLevel = .debug
@@ -158,58 +203,52 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
                 case .error: logLevel = .error
                 }
                 let cleanTag = tag.flatMap { self?.tagForProxyName($0) }
-                LogManager.shared.add(level: logLevel, proxyTag: cleanTag, message: message)
+                self?.log(session, logLevel, tag: cleanTag, message)
             },
-            onStatusChange: { [weak self] isConnected, errorMsg in
+            onStatusChange: { [weak self, weak session] isConnected, errorMsg in
                 DispatchQueue.main.async {
-                    guard let self = self, !self.isExplicitlyStopped else { return }
+                    guard let self = self, let session = session, !session.isExplicitlyStopped else { return }
                     if isConnected {
-                        self.isRunning = true
-                        self.status = .connected
+                        self.setStatus(.connected, for: session)
                     } else if let err = errorMsg {
-                        self.isRunning = false
-                        self.status = .error(err)
-                        self.scheduleReconnect()
+                        self.setStatus(.error(err), for: session)
+                        self.scheduleReconnect(session)
                     } else {
-                        self.isRunning = false
-                        self.status = .disconnected
-                        self.scheduleReconnect()
+                        self.setStatus(.disconnected, for: session)
+                        self.scheduleReconnect(session)
                     }
                 }
             },
-            onProxyStatusChange: { [weak self] proxyName, proxyStatus in
+            onProxyStatusChange: { [weak self, weak session] proxyName, proxyStatus in
                 DispatchQueue.main.async {
-                    guard let self = self else { return }
-                    self.updateProxyStatus(proxyName: proxyName, runtimeStatus: proxyStatus)
+                    guard let self = self, let session = session else { return }
+                    self.updateProxyStatus(session, proxyName: proxyName, runtimeStatus: proxyStatus)
                 }
             }
         )
 
-        self.clientService = service
-        self.isRunning = true
+        session.clientService = service
 
-        self.serviceTask = Task { [weak self, weak service] in
-            guard let self = self else { return }
+        session.serviceTask = Task { [weak self, weak service, weak session] in
+            guard let self = self, let session = session else { return }
             do {
                 try await service?.start()
-                guard !Task.isCancelled, !self.isExplicitlyStopped else { return }
+                guard !Task.isCancelled, !session.isExplicitlyStopped else { return }
                 await MainActor.run {
-                    self.isRunning = true
-                    self.status = .connected
+                    self.setStatus(.connected, for: session)
                 }
             } catch {
-                guard !Task.isCancelled, !self.isExplicitlyStopped else { return }
+                guard !Task.isCancelled, !session.isExplicitlyStopped else { return }
                 await MainActor.run {
-                    self.isRunning = false
-                    self.status = .error(error.localizedDescription)
-                    self.scheduleReconnect()
+                    self.setStatus(.error(error.localizedDescription), for: session)
+                    self.scheduleReconnect(session)
                 }
-                LogManager.shared.add(level: .error, proxyTag: nil, message: "启动失败: \(error.localizedDescription)")
+                self.log(session, .error, "启动失败: \(error.localizedDescription)")
             }
         }
     }
 
-    private func startExternalProcess(binaryPath: String, configURL: URL) {
+    private func startExternalProcess(_ session: ServerSession, binaryPath: String, configURL: URL) {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: binaryPath)
         p.arguments = ["-c", configURL.path]
@@ -218,84 +257,93 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
         p.standardOutput = pipe
         p.standardError = pipe
 
-        pipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
+        pipe.fileHandleForReading.readabilityHandler = { [weak self, weak session] handle in
             let data = handle.availableData
-            guard !data.isEmpty, let line = String(data: data, encoding: .utf8) else { return }
-            self?.parseRealFrpLog(line)
+            guard !data.isEmpty, let line = String(data: data, encoding: .utf8), let session = session else { return }
+            self?.parseRealFrpLog(session, line)
         }
 
-        p.terminationHandler = { [weak self] proc in
+        p.terminationHandler = { [weak self, weak session] proc in
             DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.isRunning = false
-                self.status = .disconnected
-                LogManager.shared.add(level: .warn, proxyTag: nil, message: "FRP 进程已退出 (code: \(proc.terminationStatus))")
-                self.scheduleReconnect()
+                // Ignore exits of a process that was already replaced or stopped on purpose
+                guard let self = self, let session = session, session.process === proc else { return }
+                self.setStatus(.disconnected, for: session)
+                self.log(session, .warn, "FRP 进程已退出 (code: \(proc.terminationStatus))")
+                self.scheduleReconnect(session)
             }
         }
 
         do {
             try p.run()
-            self.process = p
-            self.stdoutPipe = pipe
-            self.isRunning = true
-            self.status = .connecting
-            LogManager.shared.add(level: .info, proxyTag: nil, message: "FRP 外部客户端已启动 (PID: \(p.processIdentifier))")
+            session.process = p
+            session.stdoutPipe = pipe
+            setStatus(.connecting, for: session)
+            log(session, .info, "FRP 外部客户端已启动 (PID: \(p.processIdentifier))")
         } catch {
-            self.status = .error(error.localizedDescription)
-            LogManager.shared.add(level: .error, proxyTag: nil, message: "启动失败: \(error.localizedDescription)")
+            setStatus(.error(error.localizedDescription), for: session)
+            log(session, .error, "启动失败: \(error.localizedDescription)")
         }
     }
 
-    private func stopInternal() {
-        serviceTask?.cancel()
-        serviceTask = nil
+    private func stopInternal(_ session: ServerSession) {
+        session.serviceTask?.cancel()
+        session.serviceTask = nil
 
-        let svc = clientService
-        clientService = nil
+        let svc = session.clientService
+        session.clientService = nil
 
         Task {
             await svc?.detachCallbacks()
             await svc?.stop()
         }
 
-        if let p = process, p.isRunning {
+        let p = session.process
+        session.process = nil
+        if let p = p, p.isRunning {
             p.terminate()
         }
-        process = nil
-        stdoutPipe?.fileHandleForReading.readabilityHandler = nil
-        stdoutPipe = nil
+        session.stdoutPipe?.fileHandleForReading.readabilityHandler = nil
+        session.stdoutPipe = nil
 
-        for (id, _) in proxyStatuses {
-            proxyStatuses[id] = .stopped
+        for proxy in session.proxies {
+            proxyStatuses[proxy.id] = .stopped
         }
 
-        isRunning = false
-        status = .disconnected
+        setStatus(.disconnected, for: session)
     }
 
-    public func stop() {
-        isExplicitlyStopped = true
-        reconnectWorkItem?.cancel()
-        reconnectWorkItem = nil
+    /// Disconnects a single server.
+    public func stop(serverId: UUID) {
+        guard let session = sessions[serverId] else { return }
+        session.isExplicitlyStopped = true
+        session.reconnectWorkItem?.cancel()
+        session.reconnectWorkItem = nil
+        activeServerIds.remove(serverId)
 
-        stopInternal()
-        LogManager.shared.add(level: .info, proxyTag: nil, message: "已断开连接")
+        stopInternal(session)
+        sessions[serverId] = nil
+        serverStatuses[serverId] = nil
+        log(session, .info, "已断开连接")
     }
 
-    private func scheduleReconnect() {
-        guard !isExplicitlyStopped, let server = lastServer, let settings = lastSettings, settings.autoReconnect else {
-            return
+    /// Disconnects every server.
+    public func stopAll() {
+        for id in Array(sessions.keys) {
+            stop(serverId: id)
         }
-        reconnectWorkItem?.cancel()
-        let interval = max(1, settings.retryIntervalSeconds)
-        LogManager.shared.add(level: .warn, proxyTag: nil, message: "\(interval) 秒后尝试自动重新连接...")
+    }
 
-        let item = DispatchWorkItem { [weak self] in
-            guard let self = self, !self.isExplicitlyStopped else { return }
-            self.start(server: server, proxies: self.lastProxies, settings: settings)
+    private func scheduleReconnect(_ session: ServerSession) {
+        guard !session.isExplicitlyStopped, session.settings.autoReconnect else { return }
+        session.reconnectWorkItem?.cancel()
+        let interval = max(1, session.settings.retryIntervalSeconds)
+        log(session, .warn, "\(interval) 秒后尝试自动重新连接...")
+
+        let item = DispatchWorkItem { [weak self, weak session] in
+            guard let self = self, let session = session, !session.isExplicitlyStopped else { return }
+            self.start(server: session.server, proxies: session.proxies, settings: session.settings)
         }
-        reconnectWorkItem = item
+        session.reconnectWorkItem = item
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(interval), execute: item)
     }
 
@@ -314,29 +362,31 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
     }
 
     public func status(for proxy: FRPProxy) -> FRPProxyRuntimeStatus {
-        guard proxy.isEnabled else { return .stopped }
-        guard isRunning && status != .disconnected else { return .stopped }
-        return proxyStatuses[proxy.id] ?? .stopped
-    }
-
-    public var failedProxies: [FRPProxy] {
-        AppState.shared.currentProxies.filter { proxy in
-            proxy.isEnabled && (proxyStatuses[proxy.id]?.isFailed == true)
+        guard proxy.isEnabled, let serverId = proxy.serverId else { return .stopped }
+        switch serverStatuses[serverId] {
+        case .connecting, .connected:
+            return proxyStatuses[proxy.id] ?? .stopped
+        default:
+            return .stopped
         }
     }
 
-    public var failedProxiesCount: Int {
-        failedProxies.count
+    public func failedProxies(serverId: UUID) -> [FRPProxy] {
+        AppState.shared.proxies.filter { proxy in
+            proxy.serverId == serverId && proxy.isEnabled && (proxyStatuses[proxy.id]?.isFailed == true)
+        }
     }
 
-    public var hasProxyErrors: Bool {
-        !failedProxies.isEmpty
+    public func failedProxiesCount(serverId: UUID) -> Int {
+        failedProxies(serverId: serverId).count
     }
 
-    private func updateProxyStatus(proxyName: String, runtimeStatus: FRPProxyRuntimeStatus) {
-        let matchedId = proxyNameToId[proxyName] ?? lastProxies.first(where: {
-            tagForProxyName($0.name) == proxyName || $0.name == proxyName || $0.name.lowercased() == proxyName.lowercased()
-        })?.id ?? AppState.shared.currentProxies.first(where: {
+    public func hasProxyErrors(serverId: UUID) -> Bool {
+        !failedProxies(serverId: serverId).isEmpty
+    }
+
+    private func updateProxyStatus(_ session: ServerSession, proxyName: String, runtimeStatus: FRPProxyRuntimeStatus) {
+        let matchedId = session.proxyNameToId[proxyName] ?? session.proxies.first(where: {
             tagForProxyName($0.name) == proxyName || $0.name == proxyName || $0.name.lowercased() == proxyName.lowercased()
         })?.id
 
@@ -344,7 +394,7 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
             proxyStatuses[id] = runtimeStatus
 
             if case .failed(let err) = runtimeStatus {
-                let displayName = AppState.shared.proxies.first(where: { $0.id == id })?.name ?? proxyName
+                let displayName = session.proxies.first(where: { $0.id == id })?.name ?? proxyName
                 sendErrorNotificationIfNeeded(proxyName: displayName, error: err)
             }
         }
@@ -368,7 +418,7 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
         }
     }
 
-    private func parseRealFrpLog(_ output: String) {
+    private func parseRealFrpLog(_ session: ServerSession, _ output: String) {
         let ansiPattern = #"\x1B\[[0-9;]*[a-zA-Z]"#
         let ansiRegex = try? NSRegularExpression(pattern: ansiPattern)
 
@@ -418,7 +468,7 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
                 }
             }
 
-            for proxy in AppState.shared.currentProxies {
+            for proxy in session.proxies {
                 let tag = tagForProxyName(proxy.name)
                 if displayMessage.contains("[\(tag)]") || displayMessage.contains("[\(proxy.name)]") {
                     proxyTag = tag
@@ -426,7 +476,7 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
                 }
             }
 
-            if let matchedProxy = AppState.shared.currentProxies.first(where: {
+            if let matchedProxy = session.proxies.first(where: {
                 let tag = tagForProxyName($0.name)
                 return displayMessage.contains("[\(tag)]") || displayMessage.contains("[\($0.name)]")
             }) {
@@ -439,9 +489,9 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
                         } else {
                             errMsg = displayMessage
                         }
-                        self.updateProxyStatus(proxyName: matchedProxy.name, runtimeStatus: .failed(error: errMsg))
+                        self.updateProxyStatus(session, proxyName: matchedProxy.name, runtimeStatus: .failed(error: errMsg))
                     } else if displayMessage.contains("start proxy success") {
-                        self.updateProxyStatus(proxyName: matchedProxy.name, runtimeStatus: .running(remoteAddr: nil))
+                        self.updateProxyStatus(session, proxyName: matchedProxy.name, runtimeStatus: .running(remoteAddr: nil))
                     }
                 }
             }
@@ -449,13 +499,13 @@ public final class FRPProcessManager: ObservableObject, @unchecked Sendable {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 if displayMessage.contains("login to server success") || displayMessage.contains("start proxy success") {
-                    self.status = .connected
+                    self.setStatus(.connected, for: session)
                 } else if displayMessage.contains("login to the server failed") || displayMessage.contains("connect to server error") {
-                    self.status = .error("连接失败")
+                    self.setStatus(.error("连接失败"), for: session)
                 }
             }
 
-            LogManager.shared.add(level: level, proxyTag: proxyTag, message: displayMessage)
+            log(session, level, tag: proxyTag, displayMessage)
         }
     }
 }

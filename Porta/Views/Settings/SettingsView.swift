@@ -121,11 +121,7 @@ public struct SettingsView: View {
                                             .foregroundColor(.secondary)
                                     }
                                     .frame(width: 82, height: 26)
-                                    .background(Color(nsColor: .controlBackgroundColor))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 6)
-                                            .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
-                                    )
+                                    .portaGlass(in: Capsule())
                                 }
                                 .buttonStyle(.plain)
                                 .menuIndicator(.hidden)
@@ -158,11 +154,7 @@ public struct SettingsView: View {
                                             .foregroundColor(.secondary)
                                     }
                                     .frame(width: 82, height: 26)
-                                    .background(Color(nsColor: .controlBackgroundColor))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 6)
-                                            .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
-                                    )
+                                    .portaGlass(in: Capsule())
                                 }
                                 .buttonStyle(.plain)
                                 .menuIndicator(.hidden)

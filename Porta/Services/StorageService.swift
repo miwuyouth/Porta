@@ -29,6 +29,8 @@ public final class StorageService {
         public var servers: [FRPServer]
         public var proxies: [FRPProxy]
         public var selectedServerId: UUID?
+        /// Servers that were connected when data was last saved; used to restore connections on launch.
+        public var connectedServerIds: [UUID]?
         public var settings: AppSettings
     }
 
@@ -96,15 +98,17 @@ public final class StorageService {
             servers: [defaultServer, secondaryServer],
             proxies: [proxy1, proxy2, proxy3],
             selectedServerId: defaultServer.id,
+            connectedServerIds: nil,
             settings: AppSettings()
         )
     }
 
-    public func saveData(servers: [FRPServer], proxies: [FRPProxy], selectedServerId: UUID?, settings: AppSettings) {
+    public func saveData(servers: [FRPServer], proxies: [FRPProxy], selectedServerId: UUID?, connectedServerIds: [UUID], settings: AppSettings) {
         let saved = SavedData(
             servers: servers,
             proxies: proxies,
             selectedServerId: selectedServerId,
+            connectedServerIds: connectedServerIds,
             settings: settings
         )
         if let encoded = try? JSONEncoder().encode(saved) {

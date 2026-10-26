@@ -41,6 +41,8 @@ public final class AppState: ObservableObject {
     public let processManager = FRPProcessManager.shared
     public let logManager = LogManager.shared
 
+    private var launchConnectedServerIds: [UUID] = []
+
     private init() {
         loadData()
     }
@@ -53,28 +55,83 @@ public final class AppState: ObservableObject {
     }
 
     public var currentProxies: [FRPProxy] {
-        proxies.filter { $0.serverId == nil || $0.serverId == currentServer.id }
+        proxies(for: currentServer)
     }
 
-    public func connectCurrentServer() {
+    public func proxies(for server: FRPServer) -> [FRPProxy] {
+        proxies.filter { $0.serverId == server.id }
+    }
+
+    // MARK: - Connections
+
+    public func isConnectionActive(_ server: FRPServer) -> Bool {
+        processManager.isActive(serverId: server.id)
+    }
+
+    public func connect(_ server: FRPServer, persist: Bool = true) {
         processManager.start(
-            server: currentServer,
-            proxies: currentProxies,
+            server: server,
+            proxies: proxies(for: server),
             settings: settings
         )
+        if persist { saveData() }
+    }
+
+    public func disconnect(_ server: FRPServer) {
+        processManager.stop(serverId: server.id)
+        saveData()
+    }
+
+    public func toggleConnection(_ server: FRPServer) {
+        if isConnectionActive(server) {
+            disconnect(server)
+        } else {
+            connect(server)
+        }
+    }
+
+    public func connectAll() {
+        servers.forEach { connect($0, persist: false) }
+        saveData()
+    }
+
+    public func disconnectAll() {
+        processManager.stopAll()
+        saveData()
+    }
+
+    /// Restarts the connection for a server if it is currently active, so config changes take effect.
+    private func reloadIfActive(serverId: UUID?) {
+        guard let serverId = serverId,
+              processManager.isActive(serverId: serverId),
+              let server = servers.first(where: { $0.id == serverId }) else { return }
+        connect(server, persist: false)
     }
 
     public func autoConnectIfNeeded() {
         guard settings.autoConnectOnLaunch else { return }
-        connectCurrentServer()
+        let restored = servers.filter { launchConnectedServerIds.contains($0.id) }
+        // Nothing remembered (first launch / older data): fall back to the selected server
+        let targets = restored.isEmpty ? [currentServer] : restored
+        targets.forEach { connect($0, persist: false) }
+        saveData()
     }
 
     public func loadData() {
         let saved = StorageService.shared.loadData()
         self.servers = saved.servers
-        self.proxies = saved.proxies
         self.selectedServerId = saved.selectedServerId ?? saved.servers.first?.id
         self.settings = saved.settings
+        self.launchConnectedServerIds = saved.connectedServerIds ?? []
+
+        // Older data allowed proxies without a server (shared by all servers). With several
+        // simultaneous connections each proxy must belong to exactly one server.
+        let fallbackServerId = selectedServerId ?? saved.servers.first?.id
+        self.proxies = saved.proxies.map { proxy in
+            var p = proxy
+            if p.serverId == nil { p.serverId = fallbackServerId }
+            return p
+        }
     }
 
     public func saveData() {
@@ -82,6 +139,7 @@ public final class AppState: ObservableObject {
             servers: servers,
             proxies: proxies,
             selectedServerId: selectedServerId,
+            connectedServerIds: servers.map(\.id).filter { processManager.isActive(serverId: $0) },
             settings: settings
         )
     }
@@ -97,15 +155,11 @@ public final class AppState: ObservableObject {
         }
     }
 
+    /// Switches the server shown in the main window. Connections are not affected.
     public func selectServer(_ server: FRPServer) {
         self.selectedServerId = server.id
         self.dismissedBannerProxyIds.removeAll()
         saveData()
-
-        // Reconnect with new server config if running
-        if processManager.isRunning {
-            processManager.start(server: server, proxies: currentProxies, settings: settings)
-        }
     }
 
     public func toggleProxy(_ proxy: FRPProxy) {
@@ -115,11 +169,7 @@ public final class AppState: ObservableObject {
             dismissedBannerProxyIds.remove(proxy.id)
             saveData()
             processManager.notifyProxyToggled(proxy: updated)
-
-            // In real mode, reload configuration
-            if processManager.isRunning {
-                processManager.start(server: currentServer, proxies: currentProxies, settings: settings)
-            }
+            reloadIfActive(serverId: updated.serverId)
         }
     }
 
@@ -129,9 +179,7 @@ public final class AppState: ObservableObject {
         proxies.append(newProxy)
         saveData()
         processManager.notifyProxyToggled(proxy: newProxy)
-        if processManager.isRunning {
-            processManager.start(server: currentServer, proxies: currentProxies, settings: settings)
-        }
+        reloadIfActive(serverId: newProxy.serverId)
     }
 
     public func updateProxy(_ proxy: FRPProxy) {
@@ -139,49 +187,37 @@ public final class AppState: ObservableObject {
             proxies[index] = proxy
             dismissedBannerProxyIds.remove(proxy.id)
             saveData()
-            if processManager.isRunning {
-                processManager.start(server: currentServer, proxies: currentProxies, settings: settings)
-            }
+            reloadIfActive(serverId: proxy.serverId)
         }
     }
 
     public func deleteProxy(_ proxy: FRPProxy) {
         proxies.removeAll { $0.id == proxy.id }
         saveData()
-        if processManager.isRunning {
-            processManager.start(server: currentServer, proxies: currentProxies, settings: settings)
-        }
+        reloadIfActive(serverId: proxy.serverId)
     }
 
     public func addServer(_ server: FRPServer) {
         servers.append(server)
         selectedServerId = server.id
         saveData()
-        if processManager.isRunning {
-            processManager.start(server: server, proxies: currentProxies, settings: settings)
-        }
     }
 
     public func updateServer(_ server: FRPServer) {
         if let index = servers.firstIndex(where: { $0.id == server.id }) {
             servers[index] = server
             saveData()
-            if processManager.isRunning && selectedServerId == server.id {
-                processManager.start(server: server, proxies: currentProxies, settings: settings)
-            }
+            reloadIfActive(serverId: server.id)
         }
     }
 
     public func deleteServer(_ server: FRPServer) {
         guard servers.count > 1 else { return }
-        let wasActive = (selectedServerId == server.id)
+        processManager.stop(serverId: server.id)
         servers.removeAll { $0.id == server.id }
         proxies.removeAll { $0.serverId == server.id }
-        if wasActive {
+        if selectedServerId == server.id {
             selectedServerId = servers.first?.id
-            if processManager.isRunning {
-                processManager.start(server: currentServer, proxies: currentProxies, settings: settings)
-            }
         }
         saveData()
     }

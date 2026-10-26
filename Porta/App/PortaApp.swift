@@ -51,24 +51,20 @@ struct PortaApp: App {
                 Divider()
 
                 Button("重新连接") {
-                    appState.processManager.start(
-                        server: appState.currentServer,
-                        proxies: appState.currentProxies,
-                        settings: appState.settings
-                    )
+                    appState.connect(appState.currentServer)
                 }
                 .keyboardShortcut("r", modifiers: .command)
 
-                Button(appState.processManager.isRunning ? "断开连接" : "连接服务器") {
-                    if appState.processManager.isRunning {
-                        appState.processManager.stop()
-                    } else {
-                        appState.processManager.start(
-                            server: appState.currentServer,
-                            proxies: appState.currentProxies,
-                            settings: appState.settings
-                        )
-                    }
+                Button(appState.isConnectionActive(appState.currentServer) ? "断开连接" : "连接服务器") {
+                    appState.toggleConnection(appState.currentServer)
+                }
+
+                Button("连接全部服务器") {
+                    appState.connectAll()
+                }
+
+                Button("断开全部连接") {
+                    appState.disconnectAll()
                 }
             }
 

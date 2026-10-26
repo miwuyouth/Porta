@@ -3,6 +3,7 @@ import SwiftUI
 public struct ServerManagerSheet: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var appState: AppState = .shared
+    @ObservedObject var processManager: FRPProcessManager = .shared
 
     @State private var selectedServer: FRPServer?
     @State private var editingServerId: UUID?
@@ -88,22 +89,17 @@ public struct ServerManagerSheet: View {
                                 .font(.system(size: 11, weight: .semibold))
                                 .foregroundColor(.secondary)
                                 .frame(width: 22, height: 22)
-                                .background(Color(nsColor: .controlBackgroundColor))
-                                .overlay(
-                                    Circle()
-                                        .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
-                                )
-                                .clipShape(Circle())
+                                .portaGlass(in: Circle())
                         }
                         .buttonStyle(.plain)
                         .menuIndicator(.hidden)
                     }
                     .padding(.horizontal, 14)
                     .frame(height: 44)
-                    .background(Color(nsColor: .controlBackgroundColor))
+                    .background(PortaGlass.isAvailable ? Color.clear : Color(nsColor: .controlBackgroundColor))
                 }
-                .frame(width: 210)
-                .background(Color(nsColor: .controlBackgroundColor))
+                .frame(width: PortaGlass.isAvailable ? 226 : 210)
+                .portaSidebarBackground()
 
                 Divider()
 
@@ -129,7 +125,7 @@ public struct ServerManagerSheet: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(.secondary)
                                 TextField("服务器名称", text: $name)
-                                    .textFieldStyle(.roundedBorder)
+                                    .portaTextField()
                             }
 
                             // 地址 & 端口
@@ -139,7 +135,7 @@ public struct ServerManagerSheet: View {
                                         .font(.system(size: 12))
                                         .foregroundColor(.secondary)
                                     TextField("例如：frp.example.com", text: $serverAddr)
-                                        .textFieldStyle(.roundedBorder)
+                                        .portaTextField()
                                 }
 
                                 VStack(alignment: .leading, spacing: 5) {
@@ -147,7 +143,7 @@ public struct ServerManagerSheet: View {
                                         .font(.system(size: 12))
                                         .foregroundColor(.secondary)
                                     TextField("7000", text: $serverPort)
-                                        .textFieldStyle(.roundedBorder)
+                                        .portaTextField()
                                         .frame(width: 80)
                                 }
                             }
@@ -178,11 +174,7 @@ public struct ServerManagerSheet: View {
                                 }
                                 .padding(.horizontal, 8)
                                 .frame(height: 24)
-                                .background(Color(nsColor: .controlBackgroundColor))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 5)
-                                        .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
-                                )
+                                .portaGlass(in: RoundedRectangle(cornerRadius: PortaGlass.isAvailable ? 10 : 5), interactive: false)
                             }
 
                             Divider()
@@ -251,6 +243,15 @@ public struct ServerManagerSheet: View {
                         .controlSize(.regular)
                         .disabled(selectedServer?.id == appState.currentServer.id)
 
+                        if let s = selectedServer {
+                            Button(appState.isConnectionActive(s) ? "断开连接" : "连接") {
+                                saveCurrentEditingServer()
+                                appState.toggleConnection(appState.servers.first(where: { $0.id == s.id }) ?? s)
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.regular)
+                        }
+
                         Spacer()
 
                         Button("完成") {
@@ -294,6 +295,7 @@ public struct ServerManagerSheet: View {
     private func serverSidebarRow(_ server: FRPServer) -> some View {
         let isSelected = selectedServer?.id == server.id
         let isCurrent = server.id == appState.currentServer.id
+        let connectionStatus = processManager.status(forServer: server.id)
 
         Button(action: {
             if selectedServer?.id != server.id {
@@ -322,12 +324,12 @@ public struct ServerManagerSheet: View {
 
                 Spacer(minLength: 4)
 
-                if isCurrent {
-                    HStack(spacing: 4) {
-                        Circle()
-                            .fill(Color(red: 0.2, green: 0.78, blue: 0.35))
-                            .frame(width: 6, height: 6)
+                HStack(spacing: 4) {
+                    if connectionStatus != .disconnected {
+                        StatusIndicatorDot(status: connectionStatus, size: 6)
+                    }
 
+                    if isCurrent {
                         Text("当前")
                             .font(.system(size: 10.5))
                             .foregroundColor(.secondary)
@@ -336,14 +338,15 @@ public struct ServerManagerSheet: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(isSelected ? Color.accentColor.opacity(0.15) : Color.clear)
-            )
+            .portaSelectionBackground(isSelected)
             .contentShape(RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(.plain)
         .contextMenu {
+            Button(appState.isConnectionActive(server) ? "断开连接" : "连接") {
+                saveCurrentEditingServer()
+                appState.toggleConnection(appState.servers.first(where: { $0.id == server.id }) ?? server)
+            }
             if !isCurrent {
                 Button("设为当前服务器") {
                     saveCurrentEditingServer()

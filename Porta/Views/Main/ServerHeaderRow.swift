@@ -6,13 +6,26 @@ public struct ServerHeaderRow: View {
 
     public init() {}
 
+    private var server: FRPServer { appState.currentServer }
+    private var status: ConnectionStatus { processManager.status(forServer: server.id) }
+    private var hasProxyErrors: Bool { processManager.hasProxyErrors(serverId: server.id) }
+
+    private func menuTitle(for server: FRPServer) -> String {
+        switch processManager.status(forServer: server.id) {
+        case .connected: return "\(server.name) · 已连接"
+        case .connecting: return "\(server.name) · 连接中..."
+        case .error: return "\(server.name) · 连接失败"
+        case .disconnected: return server.name
+        }
+    }
+
     public var body: some View {
         VStack(spacing: 0) {
             HStack(alignment: .center, spacing: 10) {
                 // Status dot indicator
                 StatusIndicatorDot(
-                    status: processManager.status,
-                    hasWarning: processManager.status == .connected && processManager.hasProxyErrors,
+                    status: status,
+                    hasWarning: status == .connected && hasProxyErrors,
                     size: 8
                 )
 
@@ -24,7 +37,7 @@ public struct ServerHeaderRow: View {
                                 appState.selectServer(server)
                             }) {
                                 HStack {
-                                    Text(server.name)
+                                    Text(menuTitle(for: server))
                                     if server.id == appState.currentServer.id {
                                         Image(systemName: "checkmark")
                                     }
@@ -45,17 +58,29 @@ public struct ServerHeaderRow: View {
 
                     Divider()
 
-                    if processManager.isRunning {
+                    if appState.isConnectionActive(server) {
                         Button("重新连接") {
-                            processManager.start(server: appState.currentServer, proxies: appState.currentProxies, settings: appState.settings)
+                            appState.connect(server)
                         }
                         Button("断开连接") {
-                            processManager.stop()
+                            appState.disconnect(server)
                         }
                     } else {
                         Button("连接服务器") {
-                            processManager.start(server: appState.currentServer, proxies: appState.currentProxies, settings: appState.settings)
+                            appState.connect(server)
                         }
+                    }
+
+                    if appState.servers.count > 1 {
+                        Divider()
+
+                        Button("连接全部服务器") {
+                            appState.connectAll()
+                        }
+                        Button("断开全部连接") {
+                            appState.disconnectAll()
+                        }
+                        .disabled(!processManager.hasActiveServers)
                     }
                 } label: {
                     HStack(spacing: 6) {
@@ -80,25 +105,25 @@ public struct ServerHeaderRow: View {
                         appState.currentScreen = .logs
                     }
                 }) {
-                    if processManager.status == .connected && processManager.hasProxyErrors {
+                    if status == .connected && hasProxyErrors {
                         HStack(spacing: 4) {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .font(.system(size: 10))
                                 .foregroundColor(Color(red: 0.95, green: 0.60, blue: 0.08))
-                            Text("已连接 (\(processManager.failedProxiesCount)个异常)")
+                            Text("已连接 (\(processManager.failedProxiesCount(serverId: server.id))个异常)")
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(Color(red: 0.95, green: 0.60, blue: 0.08))
                         }
                         .contentShape(Rectangle())
                     } else {
-                        Text(processManager.status.displayText)
+                        Text(status.displayText)
                             .font(.system(size: 13))
                             .foregroundColor(Color(nsColor: .secondaryLabelColor))
                             .contentShape(Rectangle())
                     }
                 }
                 .buttonStyle(.plain)
-                .help(processManager.hasProxyErrors ? "存在代理注册失败，点击查看日志" : "点击查看连接日志")
+                .help(hasProxyErrors ? "存在代理注册失败，点击查看日志" : "点击查看连接日志")
             }
             .padding(.horizontal, 28)
             .padding(.top, 4)

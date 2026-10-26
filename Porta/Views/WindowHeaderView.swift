@@ -45,11 +45,7 @@ public struct WindowHeaderView: View {
                             .font(.system(size: 12.5, weight: .semibold))
                             .foregroundColor(isBackHovered ? .primary : Color.primary.opacity(0.68))
                             .frame(width: 28, height: 28)
-                            .background(Color(nsColor: .controlBackgroundColor))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
-                                )
+                            .portaGlass(in: RoundedRectangle(cornerRadius: PortaGlass.isAvailable ? 14 : 6))
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)

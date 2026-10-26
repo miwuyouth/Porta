@@ -35,11 +35,7 @@ public struct LogsView: View {
                     }
                     .padding(.horizontal, 12)
                     .frame(height: 28)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
-                    )
+                    .portaGlass(in: Capsule())
                 }
                 .buttonStyle(.plain)
                 .menuIndicator(.hidden)
@@ -63,11 +59,7 @@ public struct LogsView: View {
                     }
                     .padding(.horizontal, 12)
                     .frame(height: 28)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
-                    )
+                    .portaGlass(in: Capsule())
                 }
                 .buttonStyle(.plain)
                 .menuIndicator(.hidden)

@@ -144,12 +144,7 @@ public struct MainView: View {
                     .foregroundColor(.primary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3.5)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(Color(nsColor: .separatorColor), lineWidth: 0.5)
-                    )
-                    .cornerRadius(5)
+                    .portaGlass(in: Capsule())
             }
             .buttonStyle(.plain)
 
@@ -161,12 +156,7 @@ public struct MainView: View {
                     .foregroundColor(.primary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3.5)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(Color(nsColor: .separatorColor), lineWidth: 0.5)
-                    )
-                    .cornerRadius(5)
+                    .portaGlass(in: Capsule())
             }
             .buttonStyle(.plain)
 
@@ -187,10 +177,10 @@ public struct MainView: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: PortaGlass.isAvailable ? 16 : 8)
                 .fill(Color(red: 1.0, green: 0.23, blue: 0.19, opacity: 0.08))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: PortaGlass.isAvailable ? 16 : 8)
                         .stroke(Color(red: 1.0, green: 0.23, blue: 0.19, opacity: 0.3), lineWidth: 1)
                 )
         )

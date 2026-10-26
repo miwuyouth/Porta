@@ -41,6 +41,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
         window.styleMask.insert([.fullSizeContentView, .resizable])
         window.isMovableByWindowBackground = true
         window.backgroundColor = .appBackground
+        window.isOpaque = !PortaGlass.isAvailable
 
         // Window sizing
         window.minSize = NSSize(width: 500, height: 360)
@@ -100,34 +101,55 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
 
         let appState = AppState.shared
 
-        // Status header
-        let failedCount = appState.processManager.failedProxiesCount
-        var statusSuffix = appState.processManager.status.displayText
-        if appState.processManager.status == .connected && failedCount > 0 {
-            statusSuffix = "已连接 (\(failedCount)个代理异常)"
-        }
-        let statusTitle = "Porta - \(appState.currentServer.name) (\(statusSuffix))"
-        let statusItemMenu = NSMenuItem(title: statusTitle, action: nil, keyEquivalent: "")
-        statusItemMenu.isEnabled = false
-        menu.addItem(statusItemMenu)
-        menu.addItem(NSMenuItem.separator())
+        let pm = appState.processManager
 
-        // Proxies quick list
-        for proxy in appState.currentProxies {
-            let pStatus = appState.processManager.status(for: proxy)
-            var title = "\(proxy.name) (\(proxy.subtitle))"
-            if case .failed(let err) = pStatus {
-                title = "⚠️ \(proxy.name) (注册失败: \(FRPProxyRuntimeStatus.friendlyErrorMessage(err)))"
+        // Servers: click to connect / disconnect each one independently
+        for server in appState.servers {
+            let status = pm.status(forServer: server.id)
+            let failedCount = pm.failedProxiesCount(serverId: server.id)
+            var statusSuffix = status.displayText
+            if status == .connected && failedCount > 0 {
+                statusSuffix = "已连接 (\(failedCount)个代理异常)"
             }
             let item = NSMenuItem(
-                title: title,
-                action: #selector(toggleProxyFromMenu(_:)),
+                title: "\(server.name) (\(statusSuffix))",
+                action: #selector(toggleServerFromMenu(_:)),
                 keyEquivalent: ""
             )
             item.target = self
-            item.representedObject = proxy.id
-            item.state = proxy.isEnabled ? .on : .off
+            item.representedObject = server.id
+            item.state = pm.isActive(serverId: server.id) ? .on : .off
             menu.addItem(item)
+        }
+        menu.addItem(NSMenuItem.separator())
+
+        // Proxies quick list, grouped by server when there are several
+        for server in appState.servers {
+            let serverProxies = appState.proxies(for: server)
+            guard !serverProxies.isEmpty else { continue }
+
+            if appState.servers.count > 1 {
+                let header = NSMenuItem(title: server.name, action: nil, keyEquivalent: "")
+                header.isEnabled = false
+                menu.addItem(header)
+            }
+
+            for proxy in serverProxies {
+                let pStatus = pm.status(for: proxy)
+                var title = "\(proxy.name) (\(proxy.subtitle))"
+                if case .failed(let err) = pStatus {
+                    title = "⚠️ \(proxy.name) (注册失败: \(FRPProxyRuntimeStatus.friendlyErrorMessage(err)))"
+                }
+                let item = NSMenuItem(
+                    title: title,
+                    action: #selector(toggleProxyFromMenu(_:)),
+                    keyEquivalent: ""
+                )
+                item.target = self
+                item.representedObject = proxy.id
+                item.state = proxy.isEnabled ? .on : .off
+                menu.addItem(item)
+            }
         }
 
         menu.addItem(NSMenuItem.separator())
@@ -159,6 +181,13 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegat
         statusItem?.menu = menu
         statusItem?.button?.performClick(nil)
         statusItem?.menu = nil // Reset so clicking triggers menu creation dynamically
+    }
+
+    @objc private func toggleServerFromMenu(_ sender: NSMenuItem) {
+        guard let id = sender.representedObject as? UUID else { return }
+        if let server = AppState.shared.servers.first(where: { $0.id == id }) {
+            AppState.shared.toggleConnection(server)
+        }
     }
 
     @objc private func toggleProxyFromMenu(_ sender: NSMenuItem) {

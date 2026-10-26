@@ -24,6 +24,7 @@ public struct ContentView: View {
                 AppDelegate.shared?.configureWindow(window)
             }
         )
+        .portaWindowBackground()
         .frame(
             minWidth: 500,
             idealWidth: 540,

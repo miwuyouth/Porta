@@ -57,7 +57,7 @@ public struct AddProxySheet: View {
                             .gridColumnAlignment(.trailing)
 
                         TextField("例如：Web 服务", text: $name)
-                            .textFieldStyle(.roundedBorder)
+                            .portaTextField()
                             .frame(maxWidth: .infinity)
                     }
 
@@ -99,13 +99,13 @@ public struct AddProxySheet: View {
 
                         HStack(spacing: 8) {
                             TextField("127.0.0.1", text: $localIP)
-                                .textFieldStyle(.roundedBorder)
+                                .portaTextField()
 
                             Text(":")
                                 .foregroundColor(.secondary)
 
                             TextField("8080", text: $localPort)
-                                .textFieldStyle(.roundedBorder)
+                                .portaTextField()
                                 .frame(width: 70)
                         }
                     }
@@ -118,7 +118,7 @@ public struct AddProxySheet: View {
                                 .foregroundColor(.secondary)
 
                             TextField("例如：dev.example.com", text: $customDomains)
-                                .textFieldStyle(.roundedBorder)
+                                .portaTextField()
                         }
                     } else if type == .stcp || type == .xtcp {
                         // STCP / XTCP are point-to-point, remote port is not bound on server
@@ -129,7 +129,7 @@ public struct AddProxySheet: View {
                                 .foregroundColor(.secondary)
 
                             TextField("例如：18080", text: $remotePort)
-                                .textFieldStyle(.roundedBorder)
+                                .portaTextField()
                                 .frame(width: 100)
                         }
                     }
