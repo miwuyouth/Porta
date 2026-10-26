@@ -6,6 +6,15 @@ public struct LogsView: View {
 
     public init() {}
 
+    @ViewBuilder
+    private func proxyFilterButtons(_ proxies: [FRPProxy]) -> some View {
+        ForEach(proxies) { proxy in
+            Button(proxy.name) {
+                logManager.selectedProxyFilter = proxy.name
+            }
+        }
+    }
+
     public var body: some View {
         VStack(spacing: 0) {
             // Header: <  日志  gear
@@ -19,9 +28,16 @@ public struct LogsView: View {
                         logManager.selectedProxyFilter = "全部代理"
                     }
                     Divider()
-                    ForEach(appState.currentProxies) { proxy in
-                        Button(proxy.name) {
-                            logManager.selectedProxyFilter = proxy.name
+                    ForEach(appState.servers) { server in
+                        let serverProxies = appState.proxies(for: server)
+                        if !serverProxies.isEmpty {
+                            if appState.servers.count > 1 {
+                                Section(server.name) {
+                                    proxyFilterButtons(serverProxies)
+                                }
+                            } else {
+                                proxyFilterButtons(serverProxies)
+                            }
                         }
                     }
                 } label: {
